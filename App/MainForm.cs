@@ -13,12 +13,15 @@ namespace _2ndbrainalpha
     public partial class MainForm : Form
     {
         bool _cancelled;
+        SearchHelper _searchHelper;
 
         public MainForm()
         {
             InitializeComponent();
+            _searchHelper = new SearchHelper(CheckForCancellation, OnFile, OnMatch, OnException);
         }
 
+        #region Event handlers
         private void btnSearch_Click(object sender, EventArgs e)
         {
             txtMatches.Text = "";
@@ -43,6 +46,22 @@ namespace _2ndbrainalpha
             }
         }
 
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            _cancelled = true;
+        }
+
+        private void MainForm_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == 13)
+            {
+                btnSearch_Click(sender, e);
+            }
+        }
+
+        #endregion
+
+        #region Private methods
         // Display status message in the toolstrip area
         private void SetStatusTxt(string msg)
         {
@@ -125,8 +144,13 @@ namespace _2ndbrainalpha
                     int filesProcessed = 0;
                     foreach (var file in files)
                     {
-                        ProcessFile(file, trie, synonyms);
                         SetProgressBarValue(++filesProcessed);
+                        if (_cancelled)
+                        {
+                            SetStatusTxt("Search was canceled.");
+                            return;
+                        }
+                        _searchHelper.ProcessFile(file, trie, synonyms);
                     }
                 }
             }
@@ -140,68 +164,25 @@ namespace _2ndbrainalpha
             }
         }
 
-        private void ProcessFile(string file, AhoCorasick trie, IList<Entry> synonyms)
+        private bool CheckForCancellation()
         {
-            try
-            {
-                if (_cancelled)
-                {
-                    SetStatusTxt("Search was canceled.");
-                    return;
-                }
-                // find occurences of search word and synonyms in file
-                var lines = File.ReadAllLines(file);
-                bool writeFileHeader = true;
-                var currentLineNumber = 0;
-                foreach (var line in lines)
-                {
-                    currentLineNumber++;
-                    if (_cancelled)
-                    {
-                        SetStatusTxt("Search was canceled.");
-                        return;
-                    }
-
-                    var matches = trie
-                        .Search(line)
-                        .Where(m => {
-                            var chars = line.ToCharArray();
-                            var leftSpace = IsWhiteSpace(chars[Math.Max(m.Index - 1, 0)]);
-                            var rightSpace = IsWhiteSpace(chars[Math.Min(m.Index + m.Word.Length, line.Length - 1)]);
-                            return leftSpace && rightSpace;
-                        });
-                    if (writeFileHeader && matches.Count() > 0)
-                    {
-                        AppendTextBoxText(txtMatches, $"{file}:");
-                        writeFileHeader = false;
-                    }
-                    matches
-                        .ToList()
-                        .ForEach(m => AppendTextBoxText(txtMatches, $"{line}{Environment.NewLine}{m.Word}({currentLineNumber},{m.Index})"));
-                }
-            }
-            catch (Exception ex)
-            {
-                SetStatusTxt($"ProcessFile: file = {file}, msg = {ex.Message}");
-            }
+            return _cancelled;
         }
 
-        private bool IsWhiteSpace(char c)
+        private void OnFile(string file)
         {
-            return string.IsNullOrWhiteSpace(c.ToString()) || Regex.IsMatch(c.ToString(), "[.,;\"{}]");
+            AppendTextBoxText(txtMatches, $"{file}:");
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
+        private void OnMatch(string line, string word, int lineNumber, int column)
         {
-            _cancelled = true;
+            AppendTextBoxText(txtMatches, $"{line}{Environment.NewLine}{word}({lineNumber},{column})");
         }
 
-        private void MainForm_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (e.KeyChar == 13)
-            {
-                btnSearch_Click(sender, e);
-            }
+        private void OnException(string file, Exception ex) {
+            SetStatusTxt($"ProcessFile: file = {file}, msg = {ex.Message}");
         }
+
+        #endregion
     }
 }
