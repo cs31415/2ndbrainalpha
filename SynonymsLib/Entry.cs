@@ -1,5 +1,8 @@
 ﻿namespace SynonymsLib
 {
+    /// <summary>
+    /// Represents a synonym entry in the thesaurus
+    /// </summary>
     public class Entry
     {
         public string Type { get; set; }

@@ -1,30 +1,58 @@
 ﻿using Ganss.Text;
-using SynonymsLib;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace _2ndbrainalpha
+namespace SearchLib
 {
+    /// <summary>
+    /// Searches a file for occurences of a list of words
+    /// </summary>
     public class SearchHelper
     {
         Func<bool> CheckForCancellation;
 
         public Action<string> OnFile { get; }
-        public Action<string, string, int, int> OnMatch { get; }
+        public Action<string> OnFileMatch { get; }
+        public Action<Match> OnMatch { get; }
         public Action<string, Exception> OnException { get; }
 
-        public SearchHelper(Func<bool> checkForCancellation, Action<string> onFile, Action<string, string, int, int> onMatch, Action<string, Exception> onException)
+        public SearchHelper(
+            Func<bool> checkForCancellation, 
+            Action<string> onFile,
+            Action<string> onFileMatch, 
+            Action<Match> onMatch, 
+            Action<string, Exception> onException)
         {
             CheckForCancellation = checkForCancellation;
             OnFile = onFile;
+            OnFileMatch = onFileMatch;
             OnMatch = onMatch;
             OnException = onException;
         }
 
-        public void ProcessFile(string file, AhoCorasick trie, IList<Entry> synonyms)
+        public void SearchFiles(string[] files, IList<string> words)
+        {
+            var trie = new AhoCorasick(words);
+            if (files != null && files.Length > 0)
+            {
+                foreach (var file in files)
+                {
+                    OnFile(file);
+                    SearchFile(file, trie);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Search file for list of words
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="trie"></param>
+        /// <param name="synonyms"></param>
+        public void SearchFile(string file, AhoCorasick trie)
         {
             try
             {
@@ -51,13 +79,13 @@ namespace _2ndbrainalpha
 
                     if (writeFileHeader && matches.Count() > 0) 
                     {
-                        OnFile(file);
+                        OnFileMatch(file);
                         writeFileHeader = false;
                     }
 
                     matches
                         .ToList()
-                        .ForEach(m => OnMatch(line, m.Word, currentLineNumber, m.Index));
+                        .ForEach(m => OnMatch(new Match(file, line, m.Word, currentLineNumber, m.Index)));
                 }
             }
             catch (Exception ex)

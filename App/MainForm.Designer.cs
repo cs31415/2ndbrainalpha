@@ -39,17 +39,23 @@
             this.btnCancel = new System.Windows.Forms.ToolStripButton();
             this.dlgFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.txtSynonyms = new System.Windows.Forms.TextBox();
-            this.txtMatches = new System.Windows.Forms.TextBox();
+            this.txtFileViewer = new System.Windows.Forms.TextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.progressBarFiles = new System.Windows.Forms.ToolStripProgressBar();
             this.lblStatusText = new System.Windows.Forms.ToolStripStatusLabel();
-            this.lblFileCount = new System.Windows.Forms.ToolStripStatusLabel();
-            this.lblMaxFileCount = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblFileCount = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblMaxFileCount = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tvMatches = new System.Windows.Forms.TreeView();
+            this.splitContainerResults = new System.Windows.Forms.SplitContainer();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).BeginInit();
+            this.splitContainerResults.Panel1.SuspendLayout();
+            this.splitContainerResults.Panel2.SuspendLayout();
+            this.splitContainerResults.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -64,7 +70,7 @@
             this.btnCancel});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(979, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1284, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -131,19 +137,20 @@
             this.txtSynonyms.Name = "txtSynonyms";
             this.txtSynonyms.ReadOnly = true;
             this.txtSynonyms.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtSynonyms.Size = new System.Drawing.Size(270, 612);
+            this.txtSynonyms.Size = new System.Drawing.Size(270, 936);
             this.txtSynonyms.TabIndex = 1;
             // 
-            // txtMatches
+            // txtFileViewer
             // 
-            this.txtMatches.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtMatches.Location = new System.Drawing.Point(270, 25);
-            this.txtMatches.Multiline = true;
-            this.txtMatches.Name = "txtMatches";
-            this.txtMatches.ReadOnly = true;
-            this.txtMatches.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtMatches.Size = new System.Drawing.Size(709, 612);
-            this.txtMatches.TabIndex = 2;
+            this.txtFileViewer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtFileViewer.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtFileViewer.Location = new System.Drawing.Point(0, 0);
+            this.txtFileViewer.Multiline = true;
+            this.txtFileViewer.Name = "txtFileViewer";
+            this.txtFileViewer.ReadOnly = true;
+            this.txtFileViewer.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.txtFileViewer.Size = new System.Drawing.Size(1014, 457);
+            this.txtFileViewer.TabIndex = 2;
             // 
             // statusStrip1
             // 
@@ -155,9 +162,9 @@
             this.toolStripStatusLabel1,
             this.lblMaxFileCount,
             this.toolStripStatusLabel2});
-            this.statusStrip1.Location = new System.Drawing.Point(270, 615);
+            this.statusStrip1.Location = new System.Drawing.Point(270, 939);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(709, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(1014, 22);
             this.statusStrip1.TabIndex = 3;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -171,17 +178,17 @@
             this.lblStatusText.Name = "lblStatusText";
             this.lblStatusText.Size = new System.Drawing.Size(0, 17);
             // 
+            // toolStripStatusLabel3
+            // 
+            this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
+            this.toolStripStatusLabel3.Size = new System.Drawing.Size(60, 17);
+            this.toolStripStatusLabel3.Text = "Processed";
+            // 
             // lblFileCount
             // 
             this.lblFileCount.Name = "lblFileCount";
             this.lblFileCount.Size = new System.Drawing.Size(13, 17);
             this.lblFileCount.Text = "0";
-            // 
-            // lblMaxFileCount
-            // 
-            this.lblMaxFileCount.Name = "lblMaxFileCount";
-            this.lblMaxFileCount.Size = new System.Drawing.Size(13, 17);
-            this.lblMaxFileCount.Text = "0";
             // 
             // toolStripStatusLabel1
             // 
@@ -189,35 +196,70 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(12, 17);
             this.toolStripStatusLabel1.Text = "/";
             // 
+            // lblMaxFileCount
+            // 
+            this.lblMaxFileCount.Name = "lblMaxFileCount";
+            this.lblMaxFileCount.Size = new System.Drawing.Size(13, 17);
+            this.lblMaxFileCount.Text = "0";
+            // 
             // toolStripStatusLabel2
             // 
             this.toolStripStatusLabel2.Name = "toolStripStatusLabel2";
             this.toolStripStatusLabel2.Size = new System.Drawing.Size(28, 17);
             this.toolStripStatusLabel2.Text = "files";
             // 
-            // toolStripStatusLabel3
+            // tvMatches
             // 
-            this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
-            this.toolStripStatusLabel3.Size = new System.Drawing.Size(60, 17);
-            this.toolStripStatusLabel3.Text = "Processed";
+            this.tvMatches.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tvMatches.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
+            this.tvMatches.Location = new System.Drawing.Point(0, 0);
+            this.tvMatches.Name = "tvMatches";
+            this.tvMatches.Size = new System.Drawing.Size(1014, 453);
+            this.tvMatches.TabIndex = 4;
+            this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
+            this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
+            // 
+            // splitContainerResults
+            // 
+            this.splitContainerResults.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerResults.Location = new System.Drawing.Point(270, 25);
+            this.splitContainerResults.Name = "splitContainerResults";
+            this.splitContainerResults.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainerResults.Panel1
+            // 
+            this.splitContainerResults.Panel1.Controls.Add(this.txtFileViewer);
+            // 
+            // splitContainerResults.Panel2
+            // 
+            this.splitContainerResults.Panel2.Controls.Add(this.tvMatches);
+            this.splitContainerResults.Size = new System.Drawing.Size(1014, 914);
+            this.splitContainerResults.SplitterDistance = 457;
+            this.splitContainerResults.TabIndex = 5;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(979, 637);
+            this.ClientSize = new System.Drawing.Size(1284, 961);
+            this.Controls.Add(this.splitContainerResults);
             this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.txtMatches);
             this.Controls.Add(this.txtSynonyms);
             this.Controls.Add(this.toolStrip1);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "MainForm";
             this.Text = "Synonym Search";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyPress);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.splitContainerResults.Panel1.ResumeLayout(false);
+            this.splitContainerResults.Panel1.PerformLayout();
+            this.splitContainerResults.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).EndInit();
+            this.splitContainerResults.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -232,7 +274,7 @@
         private System.Windows.Forms.ToolStripButton btnSelectPath;
         private System.Windows.Forms.FolderBrowserDialog dlgFolderBrowser;
         public System.Windows.Forms.TextBox txtSynonyms;
-        public System.Windows.Forms.TextBox txtMatches;
+        public System.Windows.Forms.TextBox txtFileViewer;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.StatusStrip statusStrip1;
@@ -244,6 +286,8 @@
         private System.Windows.Forms.ToolStripStatusLabel lblMaxFileCount;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
+        private System.Windows.Forms.TreeView tvMatches;
+        private System.Windows.Forms.SplitContainer splitContainerResults;
     }
 }
 

@@ -7,6 +7,9 @@ using System.Text.RegularExpressions;
 
 namespace SynonymsLib
 {
+    /// <summary>
+    /// Helper class for looking up entries in the thesaurus
+    /// </summary>
     public class Lookup
     {
         public static IList<Entry> GetSynonyms(string word)
