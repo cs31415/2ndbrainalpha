@@ -39,7 +39,7 @@
             this.btnCancel = new System.Windows.Forms.ToolStripButton();
             this.dlgFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.txtSynonyms = new System.Windows.Forms.TextBox();
-            this.txtFileViewer = new System.Windows.Forms.TextBox();
+            this.txtFileViewer = new System.Windows.Forms.RichTextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.progressBarFiles = new System.Windows.Forms.ToolStripProgressBar();
             this.lblStatusText = new System.Windows.Forms.ToolStripStatusLabel();
@@ -50,12 +50,18 @@
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.tvMatches = new System.Windows.Forms.TreeView();
             this.splitContainerResults = new System.Windows.Forms.SplitContainer();
+            this.statusStrip2 = new System.Windows.Forms.StatusStrip();
+            this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblLineNumber = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblColumnNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).BeginInit();
             this.splitContainerResults.Panel1.SuspendLayout();
             this.splitContainerResults.Panel2.SuspendLayout();
             this.splitContainerResults.SuspendLayout();
+            this.statusStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -142,15 +148,21 @@
             // 
             // txtFileViewer
             // 
-            this.txtFileViewer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtFileViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.txtFileViewer.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.txtFileViewer.Location = new System.Drawing.Point(0, 0);
-            this.txtFileViewer.Multiline = true;
             this.txtFileViewer.Name = "txtFileViewer";
             this.txtFileViewer.ReadOnly = true;
-            this.txtFileViewer.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtFileViewer.Size = new System.Drawing.Size(1014, 457);
+            this.txtFileViewer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.txtFileViewer.Size = new System.Drawing.Size(1011, 432);
             this.txtFileViewer.TabIndex = 2;
+            this.txtFileViewer.Text = "";
+            this.txtFileViewer.WordWrap = false;
+            this.txtFileViewer.Click += new System.EventHandler(this.txtFileViewer_Click);
+            this.txtFileViewer.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyDown);
+            this.txtFileViewer.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyUp);
             // 
             // statusStrip1
             // 
@@ -228,6 +240,7 @@
             // 
             // splitContainerResults.Panel1
             // 
+            this.splitContainerResults.Panel1.Controls.Add(this.statusStrip2);
             this.splitContainerResults.Panel1.Controls.Add(this.txtFileViewer);
             // 
             // splitContainerResults.Panel2
@@ -236,6 +249,41 @@
             this.splitContainerResults.Size = new System.Drawing.Size(1014, 914);
             this.splitContainerResults.SplitterDistance = 457;
             this.splitContainerResults.TabIndex = 5;
+            // 
+            // statusStrip2
+            // 
+            this.statusStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripStatusLabel4,
+            this.lblLineNumber,
+            this.toolStripStatusLabel5,
+            this.lblColumnNumber});
+            this.statusStrip2.Location = new System.Drawing.Point(0, 435);
+            this.statusStrip2.Name = "statusStrip2";
+            this.statusStrip2.Size = new System.Drawing.Size(1014, 22);
+            this.statusStrip2.TabIndex = 3;
+            this.statusStrip2.Text = "statusStrip2";
+            // 
+            // toolStripStatusLabel4
+            // 
+            this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
+            this.toolStripStatusLabel4.Size = new System.Drawing.Size(35, 17);
+            this.toolStripStatusLabel4.Text = "Line: ";
+            // 
+            // lblLineNumber
+            // 
+            this.lblLineNumber.Name = "lblLineNumber";
+            this.lblLineNumber.Size = new System.Drawing.Size(0, 17);
+            // 
+            // toolStripStatusLabel5
+            // 
+            this.toolStripStatusLabel5.Name = "toolStripStatusLabel5";
+            this.toolStripStatusLabel5.Size = new System.Drawing.Size(31, 17);
+            this.toolStripStatusLabel5.Text = "Col: ";
+            // 
+            // lblColumnNumber
+            // 
+            this.lblColumnNumber.Name = "lblColumnNumber";
+            this.lblColumnNumber.Size = new System.Drawing.Size(0, 17);
             // 
             // MainForm
             // 
@@ -260,6 +308,8 @@
             this.splitContainerResults.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).EndInit();
             this.splitContainerResults.ResumeLayout(false);
+            this.statusStrip2.ResumeLayout(false);
+            this.statusStrip2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -274,7 +324,7 @@
         private System.Windows.Forms.ToolStripButton btnSelectPath;
         private System.Windows.Forms.FolderBrowserDialog dlgFolderBrowser;
         public System.Windows.Forms.TextBox txtSynonyms;
-        public System.Windows.Forms.TextBox txtFileViewer;
+        public System.Windows.Forms.RichTextBox txtFileViewer;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.StatusStrip statusStrip1;
@@ -288,6 +338,11 @@
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
         private System.Windows.Forms.TreeView tvMatches;
         private System.Windows.Forms.SplitContainer splitContainerResults;
+        private System.Windows.Forms.StatusStrip statusStrip2;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
+        private System.Windows.Forms.ToolStripStatusLabel lblLineNumber;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel5;
+        private System.Windows.Forms.ToolStripStatusLabel lblColumnNumber;
     }
 }
 

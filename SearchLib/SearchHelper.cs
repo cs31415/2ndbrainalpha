@@ -62,7 +62,6 @@ namespace SearchLib
                 var currentLineNumber = 0;
                 foreach (var line in lines)
                 {
-                    currentLineNumber++;
                     if (CheckForCancellation())
                     {
                         return;
@@ -86,6 +85,8 @@ namespace SearchLib
                     matches
                         .ToList()
                         .ForEach(m => OnMatch(new Match(file, line, m.Word, currentLineNumber, m.Index)));
+
+                    currentLineNumber++;
                 }
             }
             catch (Exception ex)

@@ -7,6 +7,7 @@ using System.Threading;
 using System.Drawing;
 using SearchLib;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace _2ndbrainalpha
 {
@@ -16,11 +17,15 @@ namespace _2ndbrainalpha
         SearchHelper _searchHelper;
         TreeNode _currentFileNode;
         int _filesProcessed;
+        const int LINE_NUMBER_LEN = 5;
+
+        public int LineNumberOffset => LINE_NUMBER_LEN + 2;
 
         public MainForm()
         {
             InitializeComponent();
             _searchHelper = new SearchHelper(CheckForCancellation, OnFile, OnFileMatch, OnMatch, OnException);
+            //stxtFileViewer.Buddy = txtLineNumbers;
         }
 
         #region Event handlers
@@ -78,7 +83,13 @@ namespace _2ndbrainalpha
             }
             else
             {
-                var wordsToHighlight = txtSynonyms.Text.Split('\n', '\r').Select(w => w.Trim()).Where(w => w.Length > 0).Distinct().ToArray();
+                var wordsToHighlight = 
+                    txtSynonyms.Text
+                    .Split('\n', '\r')
+                    .Select(w => w.Trim())
+                    .Where(w => w.Length > 0)
+                    .Distinct()
+                    .ToArray();
 
                 DrawTextWithHighlightedWords(e.Node.Text,
                                              wordsToHighlight,
@@ -92,9 +103,62 @@ namespace _2ndbrainalpha
         {
             txtFileViewer.Text = string.Empty;
             var match = e.Node.Tag as SearchLib.Match;
-            txtFileViewer.Text = File.ReadAllText(match.File).Replace("\n", Environment.NewLine);
+            string file;
+
+            if (match == null)
+            {
+                file = e.Node.Tag as string;
+            }
+            else
+            {
+                file = match.File;
+            }
+
+            var lines = File.ReadAllLines(file);
+            txtFileViewer.SuspendLayout();
+            var sb = new StringBuilder();
+            int position = 0;
+            for (int n = 0; n < lines.Length; n++)
+            {
+                var line = lines[n];
+                sb.Append($"{n + 1,5} :{line}{Environment.NewLine}");
+                if (match != null && n < match.LineNumber)
+                {
+                    position += line.Length + 1 /* for newline */ + LineNumberOffset;
+                }
+            }
+
+            txtFileViewer.Text = sb.ToString();
+
+            if (match != null)
+            {
+                position += match.StartIndex + LineNumberOffset;
+                txtFileViewer.Select(position, match.Word.Length);
+            }
+            else 
+            {
+                txtFileViewer.Select(LineNumberOffset, 0);
+            }
+            SetLineAndColumn();
+            txtFileViewer.SelectionBackColor = Color.Orange;
+            txtFileViewer.ScrollToCaret();
+            txtFileViewer.ResumeLayout();
         }
 
+        private void txtFileViewer_Click(object sender, EventArgs e)
+        {
+            SetLineAndColumn();
+        }
+
+        private void txtFileViewer_KeyUp(object sender, KeyEventArgs e)
+        {
+            SetLineAndColumn();
+        }
+
+        private void txtFileViewer_KeyDown(object sender, KeyEventArgs e)
+        {
+            SetLineAndColumn();
+        }
         #endregion
 
         #region Private methods
@@ -237,7 +301,7 @@ namespace _2ndbrainalpha
             {
                 this.Invoke(new Action<SearchLib.Match>(x => {
                     tvMatches.BeginUpdate();
-                    var node = new TreeNode(x.Line);
+                    var node = new TreeNode($"{x.Line} : ({1 + x.LineNumber},{1 + x.StartIndex})");
                     node.Tag = match;
                     _currentFileNode.Nodes.Add(node);
                     tvMatches.ExpandAll();
@@ -248,7 +312,7 @@ namespace _2ndbrainalpha
             else
             {
                 tvMatches.BeginUpdate();
-                var node = new TreeNode(match.Line);
+                var node = new TreeNode($"{match.Line} : ({1 + match.LineNumber},{1 + match.StartIndex})");
                 node.Tag = match;
                 _currentFileNode.Nodes.Add(node);
                 tvMatches.ExpandAll();
@@ -271,28 +335,16 @@ namespace _2ndbrainalpha
             location.Offset((bounds.Width - textSize.Width) / 2, 0);
 
             //Split text into substrings to highlight and not highlight.
-            var words = Regex.Split(text, @"([,\s;\.\t(){}\[\]])").Where(w => w.Length > 0).ToArray();
+            var words = Regex.Split(text, @"([,\s;\.\t\{\}\[\]()])").Where(w => w.Length > 0).ToArray();
             var wordsWithHighlightStatus = Array.ConvertAll(words,
                                                             (s) => Tuple.Create(s, wordsToHighlight.Contains(s)));
 
-            for (int i = 0; i < wordsWithHighlightStatus.GetUpperBound(0); i++)
+            for (int i = 0; i < wordsWithHighlightStatus.Length; i++)
             {
                 var wordWithHighlightStatus = wordsWithHighlightStatus[i];
                 var word = wordWithHighlightStatus.Item1;
                 var highlight = wordWithHighlightStatus.Item2;
                 var size = Size;
-
-                //Draw a space before all but the first word.
-                /*if (i > 0)
-                {
-                    size = GetTextSize(g, " ");
-                    DrawText(g,
-                         " ",
-                         location,
-                         Color.Black,
-                         Color.Transparent);
-                    location.Offset(size.Width, 0);
-                }*/
 
                 //Draw the current word.
                 size = GetTextSize(g, word);
@@ -326,6 +378,13 @@ namespace _2ndbrainalpha
 
         }
 
+        private void SetLineAndColumn()
+        {
+            int line = txtFileViewer.GetLineFromCharIndex(txtFileViewer.SelectionStart);
+            int col = txtFileViewer.SelectionStart - txtFileViewer.GetFirstCharIndexFromLine(line) - LineNumberOffset;
+            lblLineNumber.Text = col >= 0 ? (1 + line).ToString() : string.Empty;
+            lblColumnNumber.Text = col >= 0 ? (1 + col).ToString() : string.Empty;
+        }
         #endregion
     }
 }
