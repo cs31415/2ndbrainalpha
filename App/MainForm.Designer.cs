@@ -48,7 +48,7 @@
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblMaxFileCount = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.tvMatches = new System.Windows.Forms.TreeView();
+            this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
             this.splitContainerResults = new System.Windows.Forms.SplitContainer();
             this.statusStrip2 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -336,7 +336,7 @@
         private System.Windows.Forms.ToolStripStatusLabel lblMaxFileCount;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
-        private System.Windows.Forms.TreeView tvMatches;
+        private _2ndbrainalpha.BufferedTreeView tvMatches;
         private System.Windows.Forms.SplitContainer splitContainerResults;
         private System.Windows.Forms.StatusStrip statusStrip2;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;

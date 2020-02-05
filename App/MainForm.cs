@@ -15,9 +15,9 @@ namespace _2ndbrainalpha
     {
         bool _cancelled;
         SearchHelper _searchHelper;
-        TreeNode _currentFileNode;
         int _filesProcessed;
         const int LINE_NUMBER_LEN = 5;
+        string _currentFile;
 
         public int LineNumberOffset => LINE_NUMBER_LEN + 2;
 
@@ -25,13 +25,14 @@ namespace _2ndbrainalpha
         {
             InitializeComponent();
             _searchHelper = new SearchHelper(CheckForCancellation, OnFile, OnFileMatch, OnMatch, OnException);
-            //stxtFileViewer.Buddy = txtLineNumbers;
         }
 
         #region Event handlers
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            _currentFile = null;
             _filesProcessed = 0;
+            _cancelled = false;
             tvMatches.Nodes.Clear();
             txtFileViewer.Text = "";
             txtSynonyms.Text = "";
@@ -101,9 +102,9 @@ namespace _2ndbrainalpha
 
         private void tvMatches_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            txtFileViewer.Text = string.Empty;
             var match = e.Node.Tag as SearchLib.Match;
             string file;
+            bool isFileNode = match == null; 
 
             if (match == null)
             {
@@ -114,35 +115,52 @@ namespace _2ndbrainalpha
                 file = match.File;
             }
 
-            var lines = File.ReadAllLines(file);
-            txtFileViewer.SuspendLayout();
-            var sb = new StringBuilder();
             int position = 0;
-            for (int n = 0; n < lines.Length; n++)
+            if (file != _currentFile)
             {
-                var line = lines[n];
-                sb.Append($"{n + 1,5} :{line}{Environment.NewLine}");
-                if (match != null && n < match.LineNumber)
+                _currentFile = file;
+                var lines = File.ReadAllLines(file);
+                //txtFileViewer.SuspendLayout();
+                var sb = new StringBuilder();
+                for (int n = 0; n < lines.Length; n++)
                 {
-                    position += line.Length + 1 /* for newline */ + LineNumberOffset;
+                    var line = lines[n];
+                    sb.Append($"{n + 1,5} :{line}{Environment.NewLine}");
+                    if (match != null && n < match.LineNumber)
+                    {
+                        position += line.Length + 1 /* for newline */ + LineNumberOffset;
+                    }
+                }
+
+                txtFileViewer.Text = sb.ToString();
+            }
+            else 
+            {
+                var lines = txtFileViewer.Text.Split(Environment.NewLine.ToCharArray());
+                for (int n = 0; n < lines.Length; n++)
+                {
+                    var line = lines[n];
+                    if (match != null && n < match.LineNumber)
+                    {
+                        position += line.Length + 1 /* for newline */;
+                    }
                 }
             }
-
-            txtFileViewer.Text = sb.ToString();
 
             if (match != null)
             {
                 position += match.StartIndex + LineNumberOffset;
                 txtFileViewer.Select(position, match.Word.Length);
             }
-            else 
+            else
             {
                 txtFileViewer.Select(LineNumberOffset, 0);
             }
             SetLineAndColumn();
             txtFileViewer.SelectionBackColor = Color.Orange;
             txtFileViewer.ScrollToCaret();
-            txtFileViewer.ResumeLayout();
+            //txtFileViewer.ResumeLayout();
+            
         }
 
         private void txtFileViewer_Click(object sender, EventArgs e)
@@ -226,19 +244,17 @@ namespace _2ndbrainalpha
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action<string>(x => {
-                    tvMatches.BeginUpdate();
-                    _currentFileNode = tvMatches.Nodes.Add($"{x}:");
-                    _currentFileNode.Tag = file;
-                    tvMatches.EndUpdate();
+                    var fileNode = tvMatches.Nodes.Add($"{x}:");
+                    fileNode.Name = file;
+                    fileNode.Tag = file;
                 }), 
                 new object[] { file });
             }
             else
             {
-                tvMatches.BeginUpdate();
-                _currentFileNode = tvMatches.Nodes.Add($"{file}:");
-                _currentFileNode.Tag = file;
-                tvMatches.EndUpdate();
+                var fileNode = tvMatches.Nodes.Add($"{file}:");
+                fileNode.Name = file;
+                fileNode.Tag = file;
             }
         }
 
@@ -277,6 +293,7 @@ namespace _2ndbrainalpha
 
         private bool CheckForCancellation()
         {
+            Thread.Sleep(0);
             return _cancelled;
         }
 
@@ -300,23 +317,21 @@ namespace _2ndbrainalpha
             if (this.InvokeRequired)
             {
                 this.Invoke(new Action<SearchLib.Match>(x => {
-                    tvMatches.BeginUpdate();
                     var node = new TreeNode($"{x.Line} : ({1 + x.LineNumber},{1 + x.StartIndex})");
                     node.Tag = match;
-                    _currentFileNode.Nodes.Add(node);
+                    var fileNode = tvMatches.Nodes.Find(match.File, false)[0];
+                    fileNode.Nodes.Add(node);
                     tvMatches.ExpandAll();
-                    tvMatches.EndUpdate();
                 }),
                 new object[] { match });
             }
             else
             {
-                tvMatches.BeginUpdate();
                 var node = new TreeNode($"{match.Line} : ({1 + match.LineNumber},{1 + match.StartIndex})");
                 node.Tag = match;
-                _currentFileNode.Nodes.Add(node);
+                var fileNode = tvMatches.Nodes.Find(match.File, false)[0];
+                fileNode.Nodes.Add(node);
                 tvMatches.ExpandAll();
-                tvMatches.EndUpdate();
             }
         }
 
