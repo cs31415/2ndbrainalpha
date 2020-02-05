@@ -6,7 +6,7 @@ namespace _2ndbrainalpha
 {
     public class BufferedTreeView : TreeView
     {
-        public BufferedTreeView()
+        public BufferedTreeView() : base()
         {
         }
 
@@ -15,6 +15,7 @@ namespace _2ndbrainalpha
             SendMessage(this.Handle, TVM_SETEXTENDEDSTYLE, (IntPtr)TVS_EX_DOUBLEBUFFER, (IntPtr)TVS_EX_DOUBLEBUFFER);
             base.OnHandleCreated(e);
         }
+
         // Pinvoke:
         private const int TVM_SETEXTENDEDSTYLE = 0x1100 + 44;
         private const int TVS_EX_DOUBLEBUFFER = 0x0004;

@@ -274,7 +274,7 @@ namespace _2ndbrainalpha
 
                 if (!string.IsNullOrEmpty(txtPath.Text))
                 {
-                    string[] files = Directory.GetFiles(txtPath.Text, "*.txt", SearchOption.TopDirectoryOnly);
+                    string[] files = Directory.GetFiles(txtPath.Text, "*.txt", SearchOption.AllDirectories);
                     var fileCount = files.Length;
                     SetProgressBarMaximum(fileCount);
 

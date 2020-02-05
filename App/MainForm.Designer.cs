@@ -34,9 +34,7 @@
             this.txtPath = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.txtSearch = new System.Windows.Forms.ToolStripTextBox();
-            this.btnSearch = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.btnCancel = new System.Windows.Forms.ToolStripButton();
             this.dlgFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             this.txtSynonyms = new System.Windows.Forms.TextBox();
             this.txtFileViewer = new System.Windows.Forms.RichTextBox();
@@ -55,6 +53,8 @@
             this.lblLineNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblColumnNumber = new System.Windows.Forms.ToolStripStatusLabel();
+            this.btnSearch = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).BeginInit();
@@ -67,13 +67,11 @@
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnSelectPath,
             this.txtPath,
+            this.btnSelectPath,
             this.toolStripSeparator1,
             this.txtSearch,
-            this.btnSearch,
-            this.toolStripSeparator2,
-            this.btnCancel});
+            this.toolStripSeparator2});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1284, 25);
@@ -109,31 +107,10 @@
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(300, 25);
             // 
-            // btnSearch
-            // 
-            this.btnSearch.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnSearch.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSearch.Image = ((System.Drawing.Image)(resources.GetObject("btnSearch.Image")));
-            this.btnSearch.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(45, 22);
-            this.btnSearch.Text = "Search";
-            this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
-            // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
-            // 
-            // btnCancel
-            // 
-            this.btnCancel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnCancel.Image = ((System.Drawing.Image)(resources.GetObject("btnCancel.Image")));
-            this.btnCancel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(47, 22);
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // txtSynonyms
             // 
@@ -155,7 +132,6 @@
             this.txtFileViewer.Location = new System.Drawing.Point(0, 0);
             this.txtFileViewer.Name = "txtFileViewer";
             this.txtFileViewer.ReadOnly = true;
-            this.txtFileViewer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             this.txtFileViewer.Size = new System.Drawing.Size(1011, 432);
             this.txtFileViewer.TabIndex = 2;
             this.txtFileViewer.Text = "";
@@ -285,11 +261,35 @@
             this.lblColumnNumber.Name = "lblColumnNumber";
             this.lblColumnNumber.Size = new System.Drawing.Size(0, 17);
             // 
+            // btnSearch
+            // 
+            this.btnSearch.Location = new System.Drawing.Point(651, 1);
+            this.btnSearch.Name = "btnSearch";
+            this.btnSearch.Size = new System.Drawing.Size(112, 23);
+            this.btnSearch.TabIndex = 6;
+            this.btnSearch.Text = "Search";
+            this.btnSearch.UseVisualStyleBackColor = true;
+            this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Location = new System.Drawing.Point(769, 1);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(112, 23);
+            this.btnCancel.TabIndex = 7;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
             // MainForm
             // 
+            this.AcceptButton = this.btnSearch;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(1284, 961);
+            this.Controls.Add(this.btnCancel);
+            this.Controls.Add(this.btnSearch);
             this.Controls.Add(this.splitContainerResults);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.txtSynonyms);
@@ -319,7 +319,6 @@
 
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripTextBox txtSearch;
-        private System.Windows.Forms.ToolStripButton btnSearch;
         private System.Windows.Forms.ToolStripTextBox txtPath;
         private System.Windows.Forms.ToolStripButton btnSelectPath;
         private System.Windows.Forms.FolderBrowserDialog dlgFolderBrowser;
@@ -328,7 +327,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripButton btnCancel;
         private System.Windows.Forms.ToolStripProgressBar progressBarFiles;
         private System.Windows.Forms.ToolStripStatusLabel lblStatusText;
         private System.Windows.Forms.ToolStripStatusLabel lblFileCount;
@@ -343,6 +341,8 @@
         private System.Windows.Forms.ToolStripStatusLabel lblLineNumber;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel5;
         private System.Windows.Forms.ToolStripStatusLabel lblColumnNumber;
+        private System.Windows.Forms.Button btnSearch;
+        private System.Windows.Forms.Button btnCancel;
     }
 }
 
