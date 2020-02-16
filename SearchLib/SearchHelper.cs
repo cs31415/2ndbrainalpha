@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace SearchLib
 {
@@ -41,7 +42,7 @@ namespace SearchLib
                 foreach (var file in files)
                 {
                     OnFile(file);
-                    SearchFile(file, trie);
+                    Task.Run(() => SearchFile(file, trie));
                 }
             }
         }

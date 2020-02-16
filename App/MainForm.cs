@@ -8,6 +8,9 @@ using System.Drawing;
 using SearchLib;
 using System.Text.RegularExpressions;
 using System.Text;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection;
 
 namespace _2ndbrainalpha
 {
@@ -18,8 +21,12 @@ namespace _2ndbrainalpha
         int _filesProcessed;
         const int LINE_NUMBER_LEN = 5;
         string _currentFile;
+        delegate void DelegateMethod(params object[] args);
+        IList<string> _targets;
 
         public int LineNumberOffset => LINE_NUMBER_LEN + 2;
+
+        public IList<string> TargetWords => txtTargets.Text.Split('\n','\r')?.Select(w => w.Trim()).Where(w => w.Length > 0).Distinct().ToList() ?? new List<string>();
 
         public MainForm()
         {
@@ -35,7 +42,6 @@ namespace _2ndbrainalpha
             _cancelled = false;
             tvMatches.Nodes.Clear();
             txtFileViewer.Text = "";
-            txtSynonyms.Text = "";
 
             // Spin off thread to do the recon
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
@@ -69,11 +75,6 @@ namespace _2ndbrainalpha
             }
         }
 
-        private void MainForm_KeyDown(object sender, KeyEventArgs e)
-        {
-
-        }
-
         private void tvMatches_DrawNode(object sender, DrawTreeNodeEventArgs e)
         {
             var parentNode = e.Node.Parent;
@@ -84,16 +85,12 @@ namespace _2ndbrainalpha
             }
             else
             {
-                var wordsToHighlight = 
-                    txtSynonyms.Text
-                    .Split('\n', '\r')
-                    .Select(w => w.Trim())
-                    .Where(w => w.Length > 0)
-                    .Distinct()
+                var wordsToHighlight =
+                    TargetWords
                     .ToArray();
 
                 DrawTextWithHighlightedWords(e.Node.Text,
-                                             wordsToHighlight,
+                                             wordsToHighlight.ToArray<string>(),
                                              e.Graphics,
                                              e.Bounds,
                                              (e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected);
@@ -177,6 +174,28 @@ namespace _2ndbrainalpha
         {
             SetLineAndColumn();
         }
+
+        private void btnAddSynonyms_Click(object sender, EventArgs e)
+        {
+            var searchPattern = txtSearch.Text;
+            var targetWords = TargetWords;
+            //if (!targetWords.Contains(searchPattern))
+            //{
+            //    targetWords.Add(searchPattern);
+            //    AppendTextBoxText(txtTargets, searchPattern);
+            //}
+
+            // Look up synonym of search word
+            var synonyms = Lookup.GetSynonyms(searchPattern).Select(s => s.Word).Distinct().ToList();
+            foreach (var synonym in synonyms)
+            {
+                if (!targetWords.Contains(synonym))
+                {
+                    AppendTextBoxText(txtTargets, synonym);
+                }
+            }
+        }
+
         #endregion
 
         #region Private methods
@@ -212,6 +231,18 @@ namespace _2ndbrainalpha
             else
             {
                 tb.Text += $"{text}{Environment.NewLine}";
+            }
+        }
+
+        private void InvokeIfRequired(DelegateMethod method, params object[] args) 
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(method, new object[] { args });
+            }
+            else
+            {
+                method(args);
             }
         }
 
@@ -262,14 +293,12 @@ namespace _2ndbrainalpha
         {
             try
             {
-                txtSynonyms.Text = string.Empty;
-
+                var targetWords = TargetWords;
                 var searchPattern = txtSearch.Text;
-                // Look up synonym of search word
-                var synonyms = Lookup.GetSynonyms(searchPattern).Select(s => s.Word).Distinct();
-                foreach (var synonym in synonyms)
+                if (!targetWords.Contains(searchPattern)) 
                 {
-                    AppendTextBoxText(txtSynonyms, synonym);
+                    targetWords.Add(searchPattern);
+                    AppendTextBoxText(txtTargets, searchPattern);
                 }
 
                 if (!string.IsNullOrEmpty(txtPath.Text))
@@ -278,7 +307,7 @@ namespace _2ndbrainalpha
                     var fileCount = files.Length;
                     SetProgressBarMaximum(fileCount);
 
-                    _searchHelper.SearchFiles(files, synonyms.ToList());    
+                    _searchHelper.SearchFiles(files, targetWords);    
                 }
             }
             catch (ThreadAbortException tex)
