@@ -36,7 +36,6 @@
             this.txtSearch = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.dlgFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
-            this.txtFileViewer = new System.Windows.Forms.RichTextBox();
             this.statusStripBottom = new System.Windows.Forms.StatusStrip();
             this.progressBarFiles = new System.Windows.Forms.ToolStripProgressBar();
             this.lblStatusText = new System.Windows.Forms.ToolStripStatusLabel();
@@ -46,18 +45,22 @@
             this.lblMaxFileCount = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainerResults = new System.Windows.Forms.SplitContainer();
+            this.txtFileViewer = new _2ndbrainalpha.SyncTextBox();
+            this.txtLineNumbers = new _2ndbrainalpha.SyncTextBox();
             this.statusStripResults = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblLineNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblColumnNumber = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel6 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblRemainder = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.btnAddSynonyms = new System.Windows.Forms.Button();
             this.txtTargets = new System.Windows.Forms.TextBox();
             this.splitContainerMaster = new System.Windows.Forms.SplitContainer();
-            this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
             this.toolStrip1.SuspendLayout();
             this.statusStripBottom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).BeginInit();
@@ -118,23 +121,6 @@
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
-            // 
-            // txtFileViewer
-            // 
-            this.txtFileViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtFileViewer.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtFileViewer.Location = new System.Drawing.Point(0, 0);
-            this.txtFileViewer.Name = "txtFileViewer";
-            this.txtFileViewer.ReadOnly = true;
-            this.txtFileViewer.Size = new System.Drawing.Size(1001, 441);
-            this.txtFileViewer.TabIndex = 2;
-            this.txtFileViewer.Text = "";
-            this.txtFileViewer.WordWrap = false;
-            this.txtFileViewer.Click += new System.EventHandler(this.txtFileViewer_Click);
-            this.txtFileViewer.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyDown);
-            this.txtFileViewer.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyUp);
             // 
             // statusStripBottom
             // 
@@ -201,15 +187,52 @@
             // 
             // splitContainerResults.Panel1
             // 
-            this.splitContainerResults.Panel1.Controls.Add(this.statusStripResults);
+            this.splitContainerResults.Panel1.AutoScroll = true;
             this.splitContainerResults.Panel1.Controls.Add(this.txtFileViewer);
+            this.splitContainerResults.Panel1.Controls.Add(this.txtLineNumbers);
+            this.splitContainerResults.Panel1.Controls.Add(this.statusStripResults);
             // 
             // splitContainerResults.Panel2
             // 
+            this.splitContainerResults.Panel2.AutoScroll = true;
             this.splitContainerResults.Panel2.Controls.Add(this.tvMatches);
             this.splitContainerResults.Size = new System.Drawing.Size(1004, 914);
             this.splitContainerResults.SplitterDistance = 465;
             this.splitContainerResults.TabIndex = 5;
+            // 
+            // txtFileViewer
+            // 
+            this.txtFileViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFileViewer.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtFileViewer.Buddy = this.txtLineNumbers;
+            this.txtFileViewer.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtFileViewer.Location = new System.Drawing.Point(69, 0);
+            this.txtFileViewer.Name = "txtFileViewer";
+            this.txtFileViewer.ReadOnly = true;
+            this.txtFileViewer.Size = new System.Drawing.Size(932, 441);
+            this.txtFileViewer.TabIndex = 2;
+            this.txtFileViewer.Text = "";
+            this.txtFileViewer.Click += new System.EventHandler(this.txtFileViewer_Click);
+            this.txtFileViewer.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyDown);
+            this.txtFileViewer.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyUp);
+            // 
+            // txtLineNumbers
+            // 
+            this.txtLineNumbers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtLineNumbers.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.txtLineNumbers.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtLineNumbers.Buddy = null;
+            this.txtLineNumbers.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtLineNumbers.Location = new System.Drawing.Point(3, 0);
+            this.txtLineNumbers.Name = "txtLineNumbers";
+            this.txtLineNumbers.ReadOnly = true;
+            this.txtLineNumbers.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.txtLineNumbers.Size = new System.Drawing.Size(85, 441);
+            this.txtLineNumbers.TabIndex = 4;
+            this.txtLineNumbers.Text = "";
             // 
             // statusStripResults
             // 
@@ -217,7 +240,9 @@
             this.toolStripStatusLabel4,
             this.lblLineNumber,
             this.toolStripStatusLabel5,
-            this.lblColumnNumber});
+            this.lblColumnNumber,
+            this.toolStripStatusLabel6,
+            this.lblRemainder});
             this.statusStripResults.Location = new System.Drawing.Point(0, 443);
             this.statusStripResults.Name = "statusStripResults";
             this.statusStripResults.Size = new System.Drawing.Size(1004, 22);
@@ -245,6 +270,31 @@
             // 
             this.lblColumnNumber.Name = "lblColumnNumber";
             this.lblColumnNumber.Size = new System.Drawing.Size(0, 17);
+            // 
+            // toolStripStatusLabel6
+            // 
+            this.toolStripStatusLabel6.Name = "toolStripStatusLabel6";
+            this.toolStripStatusLabel6.Size = new System.Drawing.Size(34, 17);
+            this.toolStripStatusLabel6.Text = "Rem:";
+            // 
+            // lblRemainder
+            // 
+            this.lblRemainder.Name = "lblRemainder";
+            this.lblRemainder.Size = new System.Drawing.Size(0, 17);
+            // 
+            // tvMatches
+            // 
+            this.tvMatches.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tvMatches.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
+            this.tvMatches.FullRowSelect = true;
+            this.tvMatches.HideSelection = false;
+            this.tvMatches.LineColor = System.Drawing.Color.DimGray;
+            this.tvMatches.Location = new System.Drawing.Point(0, 0);
+            this.tvMatches.Name = "tvMatches";
+            this.tvMatches.Size = new System.Drawing.Size(1004, 445);
+            this.tvMatches.TabIndex = 4;
+            this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
+            this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
             // 
             // btnSearch
             // 
@@ -316,17 +366,6 @@
             this.splitContainerMaster.SplitterDistance = 276;
             this.splitContainerMaster.TabIndex = 16;
             // 
-            // tvMatches
-            // 
-            this.tvMatches.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tvMatches.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
-            this.tvMatches.Location = new System.Drawing.Point(0, 0);
-            this.tvMatches.Name = "tvMatches";
-            this.tvMatches.Size = new System.Drawing.Size(1004, 445);
-            this.tvMatches.TabIndex = 4;
-            this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
-            this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
-            // 
             // MainForm
             // 
             this.AcceptButton = this.btnSearch;
@@ -342,7 +381,10 @@
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "MainForm";
             this.Text = "Synonym Search";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyPress);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.statusStripBottom.ResumeLayout(false);
@@ -371,7 +413,7 @@
         private System.Windows.Forms.ToolStripTextBox txtPath;
         private System.Windows.Forms.ToolStripButton btnSelectPath;
         private System.Windows.Forms.FolderBrowserDialog dlgFolderBrowser;
-        public System.Windows.Forms.RichTextBox txtFileViewer;
+        public SyncTextBox txtFileViewer;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.StatusStrip statusStripBottom;
@@ -395,6 +437,9 @@
         private System.Windows.Forms.Button btnAddSynonyms;
         private System.Windows.Forms.TextBox txtTargets;
         private System.Windows.Forms.SplitContainer splitContainerMaster;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel6;
+        private System.Windows.Forms.ToolStripStatusLabel lblRemainder;
+        private SyncTextBox txtLineNumbers;
     }
 }
 

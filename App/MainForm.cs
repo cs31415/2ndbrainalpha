@@ -11,6 +11,8 @@ using System.Text;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Diagnostics;
+using Newtonsoft.Json;
 
 namespace _2ndbrainalpha
 {
@@ -23,6 +25,7 @@ namespace _2ndbrainalpha
         string _currentFile;
         delegate void DelegateMethod(params object[] args);
         IList<string> _targets;
+        string _settingsFileName;
 
         public int LineNumberOffset => LINE_NUMBER_LEN + 2;
 
@@ -31,12 +34,21 @@ namespace _2ndbrainalpha
         public MainForm()
         {
             InitializeComponent();
+            txtFileViewer.ScrollBars = RichTextBoxScrollBars.None;
             _searchHelper = new SearchHelper(CheckForCancellation, OnFile, OnFileMatch, OnMatch, OnException);
+            var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            _settingsFileName = $@"{path}\settings.txt";
         }
 
         #region Event handlers
         private void btnSearch_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtSearch.Text)) 
+            {
+                MessageBox.Show("Enter a search term");
+                return;
+            }
+
             _currentFile = null;
             _filesProcessed = 0;
             _cancelled = false;
@@ -101,7 +113,7 @@ namespace _2ndbrainalpha
         {
             var match = e.Node.Tag as SearchLib.Match;
             string file;
-            bool isFileNode = match == null; 
+            bool isFileNode = match == null;
 
             if (match == null)
             {
@@ -113,25 +125,47 @@ namespace _2ndbrainalpha
             }
 
             int position = 0;
+            // Load file if not already loaded
             if (file != _currentFile)
             {
                 _currentFile = file;
                 var lines = File.ReadAllLines(file);
                 //txtFileViewer.SuspendLayout();
                 var sb = new StringBuilder();
+                //var sbLineNumbers = new StringBuilder();
+                var charsPerLine = CalculateMaxCharsPerLine(txtFileViewer);
+                Debug.WriteLine($"charsPerLine = {charsPerLine}");
+
                 for (int n = 0; n < lines.Length; n++)
                 {
                     var line = lines[n];
-                    sb.Append($"{n + 1,5} :{line}{Environment.NewLine}");
+
+                    //var numDisplayLines = Math.Max(line.Length / charsPerLine,1);
+                    sb.Append($"{line}{Environment.NewLine}");
+                    /*var lineNumberText = !string.IsNullOrWhiteSpace(line) ? $"  {lineNum++}" : "";
+                    if (line.Length > lineNumberText.Length)
+                    {
+                        for (int i = 0; i < numDisplayLines; i++)
+                        {
+                            lineNumberText = $"{lineNumberText}{Environment.NewLine}";
+                        }
+                    }
+                    else
+                    {
+                        lineNumberText = $"{Environment.NewLine}";
+                    }
+                    sbLineNumbers.Append($"{lineNumberText}");*/
                     if (match != null && n < match.LineNumber)
                     {
-                        position += line.Length + 1 /* for newline */ + LineNumberOffset;
+                        position += line.Length + 1 /* for newline */ /*+ LineNumberOffset*/;
                     }
+
                 }
 
                 txtFileViewer.Text = sb.ToString();
+                //txtLineNumbers.Text = sbLineNumbers.ToString();
             }
-            else 
+            else
             {
                 var lines = txtFileViewer.Text.Split(Environment.NewLine.ToCharArray());
                 for (int n = 0; n < lines.Length; n++)
@@ -146,18 +180,42 @@ namespace _2ndbrainalpha
 
             if (match != null)
             {
-                position += match.StartIndex + LineNumberOffset;
+                position += match.StartIndex /*+ LineNumberOffset*/;
                 txtFileViewer.Select(position, match.Word.Length);
             }
             else
             {
-                txtFileViewer.Select(LineNumberOffset, 0);
+                txtFileViewer.Select(/*LineNumberOffset*/0, 0);
             }
             SetLineAndColumn();
             txtFileViewer.SelectionBackColor = Color.Orange;
-            txtFileViewer.ScrollToCaret();
+            //txtFileViewer.ScrollToCaret();
             //txtFileViewer.ResumeLayout();
-            
+        }
+
+        private void UpdateLineNumbers()
+        {
+            var sbLineNumbers = new StringBuilder();
+            var startCharIdx = 0;
+            var lineNum = 0;
+            var prevLineNum = lineNum;
+            var displayLineNum = 0;
+            foreach (var line in txtFileViewer.Lines)
+            {
+                prevLineNum = lineNum;
+                //if (!string.IsNullOrEmpty(line))
+                {
+                    sbLineNumbers.Append($"{displayLineNum + 1}");
+                    displayLineNum++;
+                }
+                startCharIdx = startCharIdx + line.Length + 1 /* for newline */;
+                lineNum = txtFileViewer.GetLineFromCharIndex(startCharIdx);
+                for (int i = 0; i < lineNum - prevLineNum; i++)
+                {
+                    sbLineNumbers.Append($"{Environment.NewLine}");
+                }
+            }
+            txtLineNumbers.Text = sbLineNumbers.ToString();
         }
 
         private void txtFileViewer_Click(object sender, EventArgs e)
@@ -177,6 +235,12 @@ namespace _2ndbrainalpha
 
         private void btnAddSynonyms_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(txtSearch.Text))
+            {
+                MessageBox.Show("Enter a search term");
+                return;
+            }
+
             var searchPattern = txtSearch.Text;
             var targetWords = TargetWords;
             //if (!targetWords.Contains(searchPattern))
@@ -196,9 +260,67 @@ namespace _2ndbrainalpha
             }
         }
 
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            UpdateLineNumbers();
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            LoadSettings();
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SaveSettings();
+        }
+
         #endregion
 
         #region Private methods
+        private void LoadSettings()
+        {
+            if (!File.Exists(_settingsFileName))
+                return;
+
+            var settingsText = File.ReadAllText(_settingsFileName);
+            if (settingsText != null) {
+                var settings = JsonConvert.DeserializeObject<Settings>(settingsText);
+                if (settings != null) {
+                    txtPath.Text = settings.Path;
+                    txtSearch.Text = settings.SearchText;
+                    if (settings.TargetWords != null) {
+                        foreach (var word in settings.TargetWords) {
+                            AppendTextBoxText(txtTargets, word);
+                        }
+                    }
+                }
+            }            
+        }
+
+        private void SaveSettings()
+        {
+            var settings = new Settings();
+            settings.Path = txtPath.Text;
+            settings.SearchText = txtSearch.Text;
+            settings.TargetWords = 
+                txtTargets
+                    .Text
+                    .Split(new string[] { "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries)
+                    .ToList();
+            var selectedNode = tvMatches.SelectedNode?.Tag as SearchLib.Match;
+            settings.SelectedNode = selectedNode != null ? JsonConvert.SerializeObject(selectedNode) : null;
+            File.WriteAllText(_settingsFileName, JsonConvert.SerializeObject(settings));
+        }
+
+        private int CalculateMaxCharsPerLine(RichTextBox tb)
+        {
+            Graphics g = tb.CreateGraphics();
+            float twoCharW = g.MeasureString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", tb.Font).Width;
+            float oneCharW = g.MeasureString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", tb.Font).Width;
+            return (int)((float)(tb.ClientRectangle.Width - tb.Margin.Horizontal - 15) / (twoCharW - oneCharW));
+        }
+
         // Display status message in the toolstrip area
         private void SetStatusTxt(string msg)
         {
@@ -413,22 +535,50 @@ namespace _2ndbrainalpha
         private void DrawText(Graphics g, string text, Point location, Color foreColor, Color backColor)
         {
             TextRenderer.DrawText(g,
-                                    text,
-                                    tvMatches.Font,
-                                    location,
-                                    foreColor,
-                                    backColor,
-                                    TextFormatFlags.NoPadding);
-
+                               text,
+                               tvMatches.Font,
+                               location,
+                               foreColor,
+                               backColor,
+                               TextFormatFlags.NoPadding);
         }
 
         private void SetLineAndColumn()
         {
-            int line = txtFileViewer.GetLineFromCharIndex(txtFileViewer.SelectionStart);
-            int col = txtFileViewer.SelectionStart - txtFileViewer.GetFirstCharIndexFromLine(line) - LineNumberOffset;
-            lblLineNumber.Text = col >= 0 ? (1 + line).ToString() : string.Empty;
-            lblColumnNumber.Text = col >= 0 ? (1 + col).ToString() : string.Empty;
+            var remainder = txtFileViewer.SelectionStart;
+            int lineNum = 0;
+            int col = 1;
+            bool found = false;
+            var lines = txtFileViewer.Text?.Split(Environment.NewLine.ToCharArray());
+            if (lines != null)
+            {
+                for (int n = 0; n < lines.Length; n++)
+                {
+                    var line = lines[n];
+                    remainder = remainder - line.Length - 1;
+                    if (remainder >= 0)
+                    {
+                        lineNum++;
+                    }
+                    else
+                    {
+                        found = true;
+                        col = line.Length + remainder + 2;
+                        break;
+                    }
+                }
+            }
+            lblLineNumber.Text = found ? (lineNum + 1).ToString() : string.Empty;
+            lblColumnNumber.Text = found ? col.ToString() : string.Empty;
+            lblRemainder.Text = remainder.ToString();
+
+            UpdateLineNumbers();
         }
         #endregion
+
+        private void txtFileViewer_VScroll(object sender, EventArgs e)
+        {
+
+        }
     }
 }
