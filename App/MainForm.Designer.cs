@@ -52,8 +52,6 @@
             this.lblLineNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblColumnNumber = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel6 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.lblRemainder = new System.Windows.Forms.ToolStripStatusLabel();
             this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -211,6 +209,7 @@
             this.txtFileViewer.Location = new System.Drawing.Point(69, 0);
             this.txtFileViewer.Name = "txtFileViewer";
             this.txtFileViewer.ReadOnly = true;
+            this.txtFileViewer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             this.txtFileViewer.Size = new System.Drawing.Size(932, 441);
             this.txtFileViewer.TabIndex = 2;
             this.txtFileViewer.Text = "";
@@ -229,7 +228,7 @@
             this.txtLineNumbers.Location = new System.Drawing.Point(3, 0);
             this.txtLineNumbers.Name = "txtLineNumbers";
             this.txtLineNumbers.ReadOnly = true;
-            this.txtLineNumbers.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.txtLineNumbers.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
             this.txtLineNumbers.Size = new System.Drawing.Size(85, 441);
             this.txtLineNumbers.TabIndex = 4;
             this.txtLineNumbers.Text = "";
@@ -240,9 +239,7 @@
             this.toolStripStatusLabel4,
             this.lblLineNumber,
             this.toolStripStatusLabel5,
-            this.lblColumnNumber,
-            this.toolStripStatusLabel6,
-            this.lblRemainder});
+            this.lblColumnNumber});
             this.statusStripResults.Location = new System.Drawing.Point(0, 443);
             this.statusStripResults.Name = "statusStripResults";
             this.statusStripResults.Size = new System.Drawing.Size(1004, 22);
@@ -270,17 +267,6 @@
             // 
             this.lblColumnNumber.Name = "lblColumnNumber";
             this.lblColumnNumber.Size = new System.Drawing.Size(0, 17);
-            // 
-            // toolStripStatusLabel6
-            // 
-            this.toolStripStatusLabel6.Name = "toolStripStatusLabel6";
-            this.toolStripStatusLabel6.Size = new System.Drawing.Size(34, 17);
-            this.toolStripStatusLabel6.Text = "Rem:";
-            // 
-            // lblRemainder
-            // 
-            this.lblRemainder.Name = "lblRemainder";
-            this.lblRemainder.Size = new System.Drawing.Size(0, 17);
             // 
             // tvMatches
             // 
@@ -355,6 +341,7 @@
             // 
             // splitContainerMaster.Panel1
             // 
+            this.splitContainerMaster.Panel1.AutoScroll = true;
             this.splitContainerMaster.Panel1.Controls.Add(this.label1);
             this.splitContainerMaster.Panel1.Controls.Add(this.txtTargets);
             this.splitContainerMaster.Panel1.Controls.Add(this.btnAddSynonyms);
@@ -437,8 +424,6 @@
         private System.Windows.Forms.Button btnAddSynonyms;
         private System.Windows.Forms.TextBox txtTargets;
         private System.Windows.Forms.SplitContainer splitContainerMaster;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel6;
-        private System.Windows.Forms.ToolStripStatusLabel lblRemainder;
         private SyncTextBox txtLineNumbers;
     }
 }

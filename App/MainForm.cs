@@ -130,40 +130,21 @@ namespace _2ndbrainalpha
             {
                 _currentFile = file;
                 var lines = File.ReadAllLines(file);
-                //txtFileViewer.SuspendLayout();
                 var sb = new StringBuilder();
-                //var sbLineNumbers = new StringBuilder();
                 var charsPerLine = CalculateMaxCharsPerLine(txtFileViewer);
                 Debug.WriteLine($"charsPerLine = {charsPerLine}");
 
                 for (int n = 0; n < lines.Length; n++)
                 {
                     var line = lines[n];
-
-                    //var numDisplayLines = Math.Max(line.Length / charsPerLine,1);
                     sb.Append($"{line}{Environment.NewLine}");
-                    /*var lineNumberText = !string.IsNullOrWhiteSpace(line) ? $"  {lineNum++}" : "";
-                    if (line.Length > lineNumberText.Length)
-                    {
-                        for (int i = 0; i < numDisplayLines; i++)
-                        {
-                            lineNumberText = $"{lineNumberText}{Environment.NewLine}";
-                        }
-                    }
-                    else
-                    {
-                        lineNumberText = $"{Environment.NewLine}";
-                    }
-                    sbLineNumbers.Append($"{lineNumberText}");*/
                     if (match != null && n < match.LineNumber)
                     {
-                        position += line.Length + 1 /* for newline */ /*+ LineNumberOffset*/;
+                        position += line.Length + 1;
                     }
-
                 }
 
                 txtFileViewer.Text = sb.ToString();
-                //txtLineNumbers.Text = sbLineNumbers.ToString();
             }
             else
             {
@@ -180,17 +161,16 @@ namespace _2ndbrainalpha
 
             if (match != null)
             {
-                position += match.StartIndex /*+ LineNumberOffset*/;
+                position += match.StartIndex;
                 txtFileViewer.Select(position, match.Word.Length);
             }
             else
             {
-                txtFileViewer.Select(/*LineNumberOffset*/0, 0);
+                txtFileViewer.Select(0, 0);
             }
             SetLineAndColumn();
             txtFileViewer.SelectionBackColor = Color.Orange;
-            //txtFileViewer.ScrollToCaret();
-            //txtFileViewer.ResumeLayout();
+            txtFileViewer.ScrollToCaret();
         }
 
         private void UpdateLineNumbers()
@@ -570,7 +550,6 @@ namespace _2ndbrainalpha
             }
             lblLineNumber.Text = found ? (lineNum + 1).ToString() : string.Empty;
             lblColumnNumber.Text = found ? col.ToString() : string.Empty;
-            lblRemainder.Text = remainder.ToString();
 
             UpdateLineNumbers();
         }

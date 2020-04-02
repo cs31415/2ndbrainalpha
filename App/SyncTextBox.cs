@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+//using Nik.UserControls;
 
 namespace _2ndbrainalpha
 {
@@ -37,13 +38,28 @@ namespace _2ndbrainalpha
             }
         }
 
+        public string Id { 
+            get 
+            {
+                return IsBuddy ? "[buddy]" : "";
+            }
+        }
+
+        public bool IsBuddy 
+        {
+            get {
+                return Buddy == null;
+            }
+        }
+
         private static bool scrolling;   // In case buddy tries to scroll us
         protected override void WndProc(ref Message m)
         {
             base.WndProc(ref m);
             // Trap WM_VSCROLL message and pass to buddy
-            if ((m.Msg == EM_SCROLL || m.Msg == SB_VERT || m.Msg == WM_KEYDOWN || m.Msg == WM_KEYUP))
+            if ((m.Msg == EM_SCROLL || m.Msg == SB_VERT || m.Msg == WM_KEYDOWN || m.Msg == WM_KEYUP || m.Msg == WM_VSCROLL))
             {
+                Debug.WriteLine($"{Id}WndProc::{Win32Msgs.GetMsgName(m.Msg)}");
                 if (!scrolling && Buddy != null && Buddy.IsHandleCreated)
                 {
                     scrolling = true;
@@ -60,11 +76,9 @@ namespace _2ndbrainalpha
 
         protected override void OnMouseWheel(MouseEventArgs e)
         {
-            bool isBuddy = Buddy == null;
-            var txt = isBuddy ? "[buddy]" : "";
-            Debug.WriteLine($"OnMouseWheel {txt}");
+            Debug.WriteLine($"OnMouseWheel {Id}");
 
-            if (!isBuddy)
+            if (!IsBuddy)
             {
                 if (e.Delta > 0)
                 {
