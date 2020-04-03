@@ -43,7 +43,7 @@ namespace _2ndbrainalpha
         #region Event handlers
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtSearch.Text)) 
+            if (string.IsNullOrWhiteSpace(txtSearch.Text) && string.IsNullOrWhiteSpace(txtTargets.Text)) 
             {
                 MessageBox.Show("Enter a search term");
                 return;
@@ -57,7 +57,8 @@ namespace _2ndbrainalpha
 
             // Spin off thread to do the recon
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
-            tSearch.Start();
+            var searchParams = new SearchParams {Path = txtPath.Text, Filter = txtFilter.Text, SearchPattern = txtSearch.Text, TargetWords = TargetWords};
+            tSearch.Start(searchParams);
         }
 
         private void btnSelectPath_Click(object sender, EventArgs e)
@@ -268,6 +269,7 @@ namespace _2ndbrainalpha
                 var settings = JsonConvert.DeserializeObject<Settings>(settingsText);
                 if (settings != null) {
                     txtPath.Text = settings.Path;
+                    txtFilter.Text = settings.Filter;
                     txtSearch.Text = settings.SearchText;
                     if (settings.TargetWords != null) {
                         foreach (var word in settings.TargetWords) {
@@ -282,6 +284,7 @@ namespace _2ndbrainalpha
         {
             var settings = new Settings();
             settings.Path = txtPath.Text;
+            settings.Filter = txtFilter.Text;
             settings.SearchText = txtSearch.Text;
             settings.TargetWords = 
                 txtTargets
@@ -395,17 +398,27 @@ namespace _2ndbrainalpha
         {
             try
             {
-                var targetWords = TargetWords;
-                var searchPattern = txtSearch.Text;
-                if (!targetWords.Contains(searchPattern)) 
+                SetStatusTxt("");
+                var searchParams = arg as SearchParams;
+                if (searchParams == null)
+                {
+                    SetStatusTxt("Error in search parameters.");
+                    return;
+                }
+
+                var targetWords = searchParams.TargetWords;
+                var searchPattern = searchParams.SearchPattern;
+                if (!string.IsNullOrWhiteSpace(searchPattern) && !targetWords.Contains(searchPattern)) 
                 {
                     targetWords.Add(searchPattern);
                     AppendTextBoxText(txtTargets, searchPattern);
                 }
 
-                if (!string.IsNullOrEmpty(txtPath.Text))
+                var path = $"{searchParams.Path}";
+                if (!string.IsNullOrEmpty(path))
                 {
-                    string[] files = Directory.GetFiles(txtPath.Text, "*.txt", SearchOption.AllDirectories);
+                    var filter = string.IsNullOrWhiteSpace(searchParams.Filter) ? "*.*" : searchParams.Filter; 
+                    string[] files = Directory.GetFiles(path, filter, SearchOption.AllDirectories);
                     var fileCount = files.Length;
                     SetProgressBarMaximum(fileCount);
 
@@ -554,10 +567,5 @@ namespace _2ndbrainalpha
             UpdateLineNumbers();
         }
         #endregion
-
-        private void txtFileViewer_VScroll(object sender, EventArgs e)
-        {
-
-        }
     }
 }
