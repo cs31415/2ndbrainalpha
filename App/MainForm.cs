@@ -35,7 +35,7 @@ namespace _2ndbrainalpha
         {
             InitializeComponent();
             txtFileViewer.ScrollBars = RichTextBoxScrollBars.None;
-            _searchHelper = new SearchHelper(CheckForCancellation, OnFile, OnFileMatch, OnMatch, OnException);
+            _searchHelper = new SearchHelper(CheckForCancellation, OnFile, OnFileMatch, OnMatch, OnException, OnComplete);
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _settingsFileName = $@"{path}\settings.txt";
         }
@@ -112,91 +112,8 @@ namespace _2ndbrainalpha
 
         private void tvMatches_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
-            var match = e.Node.Tag as SearchLib.Match;
-            string file;
-            bool isFileNode = match == null;
-
-            if (match == null)
-            {
-                file = e.Node.Tag as string;
-            }
-            else
-            {
-                file = match.File;
-            }
-
-            int position = 0;
-            // Load file if not already loaded
-            if (file != _currentFile)
-            {
-                _currentFile = file;
-                var lines = File.ReadAllLines(file);
-                var sb = new StringBuilder();
-                var charsPerLine = CalculateMaxCharsPerLine(txtFileViewer);
-                Debug.WriteLine($"charsPerLine = {charsPerLine}");
-
-                for (int n = 0; n < lines.Length; n++)
-                {
-                    var line = lines[n];
-                    sb.Append($"{line}{Environment.NewLine}");
-                    if (match != null && n < match.LineNumber)
-                    {
-                        position += line.Length + 1;
-                    }
-                }
-
-                txtFileViewer.Text = sb.ToString();
-            }
-            else
-            {
-                var lines = txtFileViewer.Text.Split(Environment.NewLine.ToCharArray());
-                for (int n = 0; n < lines.Length; n++)
-                {
-                    var line = lines[n];
-                    if (match != null && n < match.LineNumber)
-                    {
-                        position += line.Length + 1 /* for newline */;
-                    }
-                }
-            }
-
-            if (match != null)
-            {
-                position += match.StartIndex;
-                txtFileViewer.Select(position, match.Word.Length);
-            }
-            else
-            {
-                txtFileViewer.Select(0, 0);
-            }
-            SetLineAndColumn();
-            txtFileViewer.SelectionBackColor = Color.Orange;
-            txtFileViewer.ScrollToCaret();
-        }
-
-        private void UpdateLineNumbers()
-        {
-            var sbLineNumbers = new StringBuilder();
-            var startCharIdx = 0;
-            var lineNum = 0;
-            var prevLineNum = lineNum;
-            var displayLineNum = 0;
-            foreach (var line in txtFileViewer.Lines)
-            {
-                prevLineNum = lineNum;
-                //if (!string.IsNullOrEmpty(line))
-                {
-                    sbLineNumbers.Append($"{displayLineNum + 1}");
-                    displayLineNum++;
-                }
-                startCharIdx = startCharIdx + line.Length + 1 /* for newline */;
-                lineNum = txtFileViewer.GetLineFromCharIndex(startCharIdx);
-                for (int i = 0; i < lineNum - prevLineNum; i++)
-                {
-                    sbLineNumbers.Append($"{Environment.NewLine}");
-                }
-            }
-            txtLineNumbers.Text = sbLineNumbers.ToString();
+            var node = e.Node;
+            SelectNode(node);
         }
 
         private void txtFileViewer_Click(object sender, EventArgs e)
@@ -256,9 +173,108 @@ namespace _2ndbrainalpha
             SaveSettings();
         }
 
+        private void txtTargets_TextChanged(object sender, EventArgs e)
+        {
+            var count = TargetWords.Count;
+            var suffix = count > 0 ? "s" : "";
+            lblTargetCount.Text = $"{count} item{suffix}";
+        }
+
         #endregion
 
         #region Private methods
+                private void SelectNode(TreeNode node)
+        {
+            var match = node.Tag as SearchLib.Match;
+            string file;
+
+            if (match == null)
+            {
+                file = node.Tag as string;
+            }
+            else
+            {
+                file = match.File;
+            }
+
+            if (file == null)
+            {
+                return;
+            }
+
+            int position = 0;
+            // Load file if not already loaded
+            if (file != _currentFile)
+            {
+                _currentFile = file;
+                var lines = File.ReadAllLines(file);
+                var sb = new StringBuilder();
+
+                for (int n = 0; n < lines.Length; n++)
+                {
+                    var line = lines[n];
+                    sb.Append($"{line}{Environment.NewLine}");
+                    if (match != null && n < match.LineNumber)
+                    {
+                        position += line.Length + 1;
+                    }
+                }
+
+                txtFileViewer.Text = sb.ToString();
+            }
+            else
+            {
+                var lines = txtFileViewer.Text.Split(Environment.NewLine.ToCharArray());
+                for (int n = 0; n < lines.Length; n++)
+                {
+                    var line = lines[n];
+                    if (match != null && n < match.LineNumber)
+                    {
+                        position += line.Length + 1 /* for newline */;
+                    }
+                }
+            }
+
+            if (match != null)
+            {
+                position += match.StartIndex;
+                txtFileViewer.Select(position, match.Word.Length);
+            }
+            else
+            {
+                txtFileViewer.Select(0, 0);
+            }
+
+            SetLineAndColumn();
+            txtFileViewer.SelectionBackColor = Color.Orange;
+            txtFileViewer.ScrollToCaret();
+        }
+
+        private void UpdateLineNumbers()
+        {
+            var sbLineNumbers = new StringBuilder();
+            var startCharIdx = 0;
+            var lineNum = 0;
+            var prevLineNum = lineNum;
+            var displayLineNum = 0;
+            foreach (var line in txtFileViewer.Lines)
+            {
+                prevLineNum = lineNum;
+                //if (!string.IsNullOrEmpty(line))
+                {
+                    sbLineNumbers.Append($"{displayLineNum + 1}");
+                    displayLineNum++;
+                }
+                startCharIdx = startCharIdx + line.Length + 1 /* for newline */;
+                lineNum = txtFileViewer.GetLineFromCharIndex(startCharIdx);
+                for (int i = 0; i < lineNum - prevLineNum; i++)
+                {
+                    sbLineNumbers.Append($"{Environment.NewLine}");
+                }
+            }
+            txtLineNumbers.Text = sbLineNumbers.ToString();
+        }
+
         private void LoadSettings()
         {
             if (!File.Exists(_settingsFileName))
@@ -296,47 +312,25 @@ namespace _2ndbrainalpha
             File.WriteAllText(_settingsFileName, JsonConvert.SerializeObject(settings));
         }
 
-        private int CalculateMaxCharsPerLine(RichTextBox tb)
-        {
-            Graphics g = tb.CreateGraphics();
-            float twoCharW = g.MeasureString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", tb.Font).Width;
-            float oneCharW = g.MeasureString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", tb.Font).Width;
-            return (int)((float)(tb.ClientRectangle.Width - tb.Margin.Horizontal - 15) / (twoCharW - oneCharW));
-        }
-
         // Display status message in the toolstrip area
         private void SetStatusTxt(string msg)
         {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(
-                    new Action<string>((x) =>
+            InvokeIfRequired(
+                    x =>
                     {
-                        lblStatusText.Text = x;
-                    }),
-                    new object[] { msg });
-            }
-            else
-            {
-                lblStatusText.Text = msg;
-            }
+                        lblStatusText.Text = (string)x[0];
+                    },
+                    msg);
         }
 
         private void AppendTextBoxText(TextBox tb, string text)
         {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(
-                    new Action<string>((x) =>
+            InvokeIfRequired(
+                    x =>
                     {
-                        tb.Text += $"{x}{Environment.NewLine}";
-                    }),
-                    new object[] { text });
-            }
-            else
-            {
-                tb.Text += $"{text}{Environment.NewLine}";
-            }
+                        tb.Text += $"{x[0]}{Environment.NewLine}";
+                    },
+                    text);
         }
 
         private void InvokeIfRequired(DelegateMethod method, params object[] args) 
@@ -353,44 +347,35 @@ namespace _2ndbrainalpha
 
         private void SetProgressBarValue(int value)
         {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action<int>(x => { progressBarFiles.Value = x; lblFileCount.Text = x.ToString(); } ), new object[] { value});
-            }
-            else
-            {
-                progressBarFiles.Value = value;
-            }
+            InvokeIfRequired(x => { progressBarFiles.Value = (int)x[0]; lblFileCount.Text = x[0].ToString(); }, value);
         }
 
         private void SetProgressBarMaximum(int max)
         {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action<int>(x => { progressBarFiles.Maximum = x; lblMaxFileCount.Text = x.ToString(); }), new object[] { max });
-            }
-            else
-            {
-                progressBarFiles.Maximum = max;
-            }
+            InvokeIfRequired(x => { progressBarFiles.Maximum = (int)x[0]; lblMaxFileCount.Text = x[0].ToString(); }, max);
         }
 
-        private void AddFileToResults(string file)
+        private void AddFileToResults(string file, int count)
         {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action<string>(x => {
-                    var fileNode = tvMatches.Nodes.Add($"{x}:");
+            var fAddFileToResults = 
+                new Action<string,int> ((f,c) =>
+                {
+                    var fileNode = tvMatches.Nodes.Add($"{f} ({c} items)");
                     fileNode.Name = file;
                     fileNode.Tag = file;
-                }), 
-                new object[] { file });
+                    if (tvMatches.SelectedNode == null && tvMatches.Nodes.Count > 0)
+                    {
+                        tvMatches.SelectedNode = tvMatches.Nodes[0];
+                        SelectNode(tvMatches.SelectedNode);
+                    }
+                });
+            if (this.InvokeRequired)
+            {
+                this.Invoke(fAddFileToResults, file, count);
             }
             else
             {
-                var fileNode = tvMatches.Nodes.Add($"{file}:");
-                fileNode.Name = file;
-                fileNode.Tag = file;
+                fAddFileToResults(file, count);
             }
         }
 
@@ -451,36 +436,37 @@ namespace _2ndbrainalpha
             }
         }
 
-        private void OnFileMatch(string file)
+        private void OnFileMatch(string file, int count)
         {
-            AddFileToResults(file);
+            AddFileToResults(file, count);
         }
 
         private void OnMatch(SearchLib.Match match)
         {
-            if (this.InvokeRequired)
+            var onMatch = new Action<SearchLib.Match>(x =>
             {
-                this.Invoke(new Action<SearchLib.Match>(x => {
-                    var node = new TreeNode($"{x.Line} : ({1 + x.LineNumber},{1 + x.StartIndex})");
-                    node.Tag = match;
-                    var fileNode = tvMatches.Nodes.Find(match.File, false)[0];
-                    fileNode.Nodes.Add(node);
-                    tvMatches.ExpandAll();
-                }),
-                new object[] { match });
-            }
-            else
-            {
-                var node = new TreeNode($"{match.Line} : ({1 + match.LineNumber},{1 + match.StartIndex})");
+                var node = new TreeNode($"{x.Line} : ({1 + x.LineNumber},{1 + x.StartIndex})");
                 node.Tag = match;
                 var fileNode = tvMatches.Nodes.Find(match.File, false)[0];
                 fileNode.Nodes.Add(node);
                 tvMatches.ExpandAll();
+            });
+            if (this.InvokeRequired)
+            {
+                this.Invoke(onMatch, match);
+            }
+            else
+            {
+                onMatch(match);
             }
         }
 
         private void OnException(string file, Exception ex) {
             SetStatusTxt($"ProcessFile: file = {file}, msg = {ex.Message}");
+        }
+
+        private void OnComplete()
+        {
         }
 
         private void DrawTextWithHighlightedWords(string text, string[] wordsToHighlight, Graphics g, Rectangle bounds, bool selected)

@@ -13,25 +13,28 @@ namespace SearchLib
     /// </summary>
     public class SearchHelper
     {
-        Func<bool> CheckForCancellation;
+        readonly Func<bool> _checkForCancellation;
 
         public Action<string> OnFile { get; }
-        public Action<string> OnFileMatch { get; }
+        public Action<string, int> OnFileMatch { get; }
         public Action<Match> OnMatch { get; }
         public Action<string, Exception> OnException { get; }
+        public Action OnComplete { get; }
 
         public SearchHelper(
             Func<bool> checkForCancellation, 
             Action<string> onFile,
-            Action<string> onFileMatch, 
+            Action<string, int> onFileMatch, 
             Action<Match> onMatch, 
-            Action<string, Exception> onException)
+            Action<string, Exception> onException,
+            Action onComplete)
         {
-            CheckForCancellation = checkForCancellation;
+            _checkForCancellation = checkForCancellation;
             OnFile = onFile;
             OnFileMatch = onFileMatch;
             OnMatch = onMatch;
             OnException = onException;
+            OnComplete = onComplete;
         }
 
         public void SearchFiles(string[] files, IList<string> words)
@@ -39,11 +42,16 @@ namespace SearchLib
             var trie = new AhoCorasick(words);
             if (files != null && files.Length > 0)
             {
+                var tasks = new List<Task>();
                 foreach (var file in files)
                 {
                     OnFile(file);
-                    Task.Run(async () => await SearchFile(file, trie));
+                    Action search = async () => await SearchFile(file, trie);
+                    tasks.Add(Task.Run(search));
                 }
+
+                Task.WaitAll(tasks.ToArray());
+                OnComplete();
             }
         }
 
@@ -52,47 +60,48 @@ namespace SearchLib
         /// </summary>
         /// <param name="file"></param>
         /// <param name="trie"></param>
-        /// <param name="synonyms"></param>
         public async Task SearchFile(string file, AhoCorasick trie)
         {
             try
             {
-                // find occurences of search word and synonyms in file
+                // find occurrences of search word and synonyms in file
                 using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 using (var reader = new StreamReader(fs))
                 {
                     var text = await reader.ReadToEndAsync();
-                    var lines = text.Split(new [] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
-                    bool writeFileHeader = true;
+                    var lines = text.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
                     var currentLineNumber = 0;
+                    var matches = new List<Match>();
                     foreach (var line in lines)
                     {
-                        if (CheckForCancellation())
+                        if (_checkForCancellation())
                         {
                             return;
                         }
 
-                        var matches = trie
+                        matches.AddRange(trie
                             .Search(line)
-                            .Where(m => {
+                            .Where(m =>
+                            {
                                 var chars = line.ToCharArray();
                                 var leftSpace = IsWhiteSpace(chars[Math.Max(m.Index - 1, 0)]);
-                                var rightSpace = IsWhiteSpace(chars[Math.Min(m.Index + m.Word.Length, line.Length - 1)]);
+                                var rightSpace =
+                                    IsWhiteSpace(chars[Math.Min(m.Index + m.Word.Length, line.Length - 1)]);
                                 return leftSpace && rightSpace;
-                            });
-
-                        if (writeFileHeader && matches.Count() > 0) 
-                        {
-                            OnFileMatch(file);
-                            writeFileHeader = false;
-                        }
-
-                        matches
-                            .ToList()
-                            .ForEach(m => OnMatch(new Match(file, line, m.Word, currentLineNumber, m.Index)));
+                            })
+                            .Select(m => new Match(file, line, m.Word, currentLineNumber, m.Index))
+                            .ToList());
 
                         currentLineNumber++;
                     }
+
+                    if (matches.Any())
+                    {
+                        OnFileMatch(file, matches.Count);
+                    }
+
+                    matches
+                        .ForEach(m => OnMatch(m));
                 }
             }
             catch (Exception ex)
