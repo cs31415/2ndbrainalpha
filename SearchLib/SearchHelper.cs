@@ -42,7 +42,7 @@ namespace SearchLib
                 foreach (var file in files)
                 {
                     OnFile(file);
-                    Task.Run(() => SearchFile(file, trie));
+                    Task.Run(async () => await SearchFile(file, trie));
                 }
             }
         }
@@ -53,41 +53,46 @@ namespace SearchLib
         /// <param name="file"></param>
         /// <param name="trie"></param>
         /// <param name="synonyms"></param>
-        public void SearchFile(string file, AhoCorasick trie)
+        public async Task SearchFile(string file, AhoCorasick trie)
         {
             try
             {
                 // find occurences of search word and synonyms in file
-                var lines = File.ReadAllLines(file);
-                bool writeFileHeader = true;
-                var currentLineNumber = 0;
-                foreach (var line in lines)
+                using (var fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var reader = new StreamReader(fs))
                 {
-                    if (CheckForCancellation())
+                    var text = await reader.ReadToEndAsync();
+                    var lines = text.Split(new [] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
+                    bool writeFileHeader = true;
+                    var currentLineNumber = 0;
+                    foreach (var line in lines)
                     {
-                        return;
+                        if (CheckForCancellation())
+                        {
+                            return;
+                        }
+
+                        var matches = trie
+                            .Search(line)
+                            .Where(m => {
+                                var chars = line.ToCharArray();
+                                var leftSpace = IsWhiteSpace(chars[Math.Max(m.Index - 1, 0)]);
+                                var rightSpace = IsWhiteSpace(chars[Math.Min(m.Index + m.Word.Length, line.Length - 1)]);
+                                return leftSpace && rightSpace;
+                            });
+
+                        if (writeFileHeader && matches.Count() > 0) 
+                        {
+                            OnFileMatch(file);
+                            writeFileHeader = false;
+                        }
+
+                        matches
+                            .ToList()
+                            .ForEach(m => OnMatch(new Match(file, line, m.Word, currentLineNumber, m.Index)));
+
+                        currentLineNumber++;
                     }
-
-                    var matches = trie
-                        .Search(line)
-                        .Where(m => {
-                            var chars = line.ToCharArray();
-                            var leftSpace = IsWhiteSpace(chars[Math.Max(m.Index - 1, 0)]);
-                            var rightSpace = IsWhiteSpace(chars[Math.Min(m.Index + m.Word.Length, line.Length - 1)]);
-                            return leftSpace && rightSpace;
-                        });
-
-                    if (writeFileHeader && matches.Count() > 0) 
-                    {
-                        OnFileMatch(file);
-                        writeFileHeader = false;
-                    }
-
-                    matches
-                        .ToList()
-                        .ForEach(m => OnMatch(new Match(file, line, m.Word, currentLineNumber, m.Index)));
-
-                    currentLineNumber++;
                 }
             }
             catch (Exception ex)
