@@ -46,7 +46,6 @@
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainerResults = new System.Windows.Forms.SplitContainer();
             this.txtFileViewer = new _2ndbrainalpha.SyncTextBox();
-            this.txtLineNumbers = new _2ndbrainalpha.SyncTextBox();
             this.statusStripResults = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblLineNumber = new System.Windows.Forms.ToolStripStatusLabel();
@@ -59,6 +58,7 @@
             this.btnAddSynonyms = new System.Windows.Forms.Button();
             this.txtTargets = new System.Windows.Forms.TextBox();
             this.splitContainerMaster = new System.Windows.Forms.SplitContainer();
+            this.txtLineNumbers = new _2ndbrainalpha.SyncTextBox();
             this.toolStrip1.SuspendLayout();
             this.statusStripBottom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).BeginInit();
@@ -217,22 +217,6 @@
             this.txtFileViewer.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyDown);
             this.txtFileViewer.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyUp);
             // 
-            // txtLineNumbers
-            // 
-            this.txtLineNumbers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtLineNumbers.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtLineNumbers.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtLineNumbers.Buddy = null;
-            this.txtLineNumbers.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtLineNumbers.Location = new System.Drawing.Point(3, 0);
-            this.txtLineNumbers.Name = "txtLineNumbers";
-            this.txtLineNumbers.ReadOnly = true;
-            this.txtLineNumbers.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.txtLineNumbers.Size = new System.Drawing.Size(85, 441);
-            this.txtLineNumbers.TabIndex = 4;
-            this.txtLineNumbers.Text = "";
-            // 
             // statusStripResults
             // 
             this.statusStripResults.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -352,6 +336,22 @@
             this.splitContainerMaster.Size = new System.Drawing.Size(1284, 914);
             this.splitContainerMaster.SplitterDistance = 276;
             this.splitContainerMaster.TabIndex = 16;
+            // 
+            // txtLineNumbers
+            // 
+            this.txtLineNumbers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtLineNumbers.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.txtLineNumbers.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtLineNumbers.Buddy = null;
+            this.txtLineNumbers.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtLineNumbers.Location = new System.Drawing.Point(3, 0);
+            this.txtLineNumbers.Name = "txtLineNumbers";
+            this.txtLineNumbers.ReadOnly = true;
+            this.txtLineNumbers.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.txtLineNumbers.Size = new System.Drawing.Size(85, 441);
+            this.txtLineNumbers.TabIndex = 4;
+            this.txtLineNumbers.Text = "";
             // 
             // MainForm
             // 
