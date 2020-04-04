@@ -28,11 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.txtPath = new System.Windows.Forms.ToolStripTextBox();
             this.btnSelectPath = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.txtFilter = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
             this.txtSearch = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.dlgFolderBrowser = new System.Windows.Forms.FolderBrowserDialog();
@@ -50,17 +56,16 @@
             this.lblLineNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblColumnNumber = new System.Windows.Forms.ToolStripStatusLabel();
+            this.btnExpandCollapse = new System.Windows.Forms.Button();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.btnAddSynonyms = new System.Windows.Forms.Button();
             this.txtTargets = new System.Windows.Forms.TextBox();
             this.splitContainerMaster = new System.Windows.Forms.SplitContainer();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
-            this.txtFilter = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.lblTargetCount = new System.Windows.Forms.Label();
+            this.ctxMenuFileNode = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnuCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.txtFileViewer = new _2ndbrainalpha.SyncTextBox();
             this.txtLineNumbers = new _2ndbrainalpha.SyncTextBox();
             this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
@@ -75,6 +80,7 @@
             this.splitContainerMaster.Panel1.SuspendLayout();
             this.splitContainerMaster.Panel2.SuspendLayout();
             this.splitContainerMaster.SuspendLayout();
+            this.ctxMenuFileNode.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -92,9 +98,15 @@
             this.toolStripSeparator2});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1284, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1301, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripLabel2
+            // 
+            this.toolStripLabel2.Name = "toolStripLabel2";
+            this.toolStripLabel2.Size = new System.Drawing.Size(34, 22);
+            this.toolStripLabel2.Text = "Path:";
             // 
             // txtPath
             // 
@@ -119,6 +131,28 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(36, 22);
+            this.toolStripLabel1.Text = "Filter:";
+            // 
+            // txtFilter
+            // 
+            this.txtFilter.Name = "txtFilter";
+            this.txtFilter.Size = new System.Drawing.Size(100, 25);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripLabel3
+            // 
+            this.toolStripLabel3.Name = "toolStripLabel3";
+            this.toolStripLabel3.Size = new System.Drawing.Size(69, 22);
+            this.toolStripLabel3.Text = "Search Text:";
+            // 
             // txtSearch
             // 
             this.txtSearch.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -140,9 +174,9 @@
             this.toolStripStatusLabel1,
             this.lblMaxFileCount,
             this.toolStripStatusLabel2});
-            this.statusStripBottom.Location = new System.Drawing.Point(0, 939);
+            this.statusStripBottom.Location = new System.Drawing.Point(0, 796);
             this.statusStripBottom.Name = "statusStripBottom";
-            this.statusStripBottom.Size = new System.Drawing.Size(1284, 22);
+            this.statusStripBottom.Size = new System.Drawing.Size(1301, 22);
             this.statusStripBottom.TabIndex = 3;
             this.statusStripBottom.Text = "statusStrip1";
             // 
@@ -203,9 +237,10 @@
             // splitContainerResults.Panel2
             // 
             this.splitContainerResults.Panel2.AutoScroll = true;
+            this.splitContainerResults.Panel2.Controls.Add(this.btnExpandCollapse);
             this.splitContainerResults.Panel2.Controls.Add(this.tvMatches);
-            this.splitContainerResults.Size = new System.Drawing.Size(1004, 914);
-            this.splitContainerResults.SplitterDistance = 465;
+            this.splitContainerResults.Size = new System.Drawing.Size(1018, 771);
+            this.splitContainerResults.SplitterDistance = 392;
             this.splitContainerResults.TabIndex = 5;
             // 
             // statusStripResults
@@ -215,9 +250,9 @@
             this.lblLineNumber,
             this.toolStripStatusLabel5,
             this.lblColumnNumber});
-            this.statusStripResults.Location = new System.Drawing.Point(0, 443);
+            this.statusStripResults.Location = new System.Drawing.Point(0, 370);
             this.statusStripResults.Name = "statusStripResults";
-            this.statusStripResults.Size = new System.Drawing.Size(1004, 22);
+            this.statusStripResults.Size = new System.Drawing.Size(1018, 22);
             this.statusStripResults.TabIndex = 3;
             this.statusStripResults.Text = "statusStrip2";
             // 
@@ -242,6 +277,16 @@
             // 
             this.lblColumnNumber.Name = "lblColumnNumber";
             this.lblColumnNumber.Size = new System.Drawing.Size(0, 17);
+            // 
+            // btnExpandCollapse
+            // 
+            this.btnExpandCollapse.Location = new System.Drawing.Point(0, 3);
+            this.btnExpandCollapse.Name = "btnExpandCollapse";
+            this.btnExpandCollapse.Size = new System.Drawing.Size(75, 23);
+            this.btnExpandCollapse.TabIndex = 5;
+            this.btnExpandCollapse.Text = "Expand/Collapse";
+            this.btnExpandCollapse.UseVisualStyleBackColor = true;
+            this.btnExpandCollapse.Click += new System.EventHandler(this.btnExpandCollapse_Click);
             // 
             // btnSearch
             // 
@@ -275,7 +320,7 @@
             // 
             // btnAddSynonyms
             // 
-            this.btnAddSynonyms.Location = new System.Drawing.Point(16, 25);
+            this.btnAddSynonyms.Location = new System.Drawing.Point(12, 28);
             this.btnAddSynonyms.Name = "btnAddSynonyms";
             this.btnAddSynonyms.Size = new System.Drawing.Size(104, 23);
             this.btnAddSynonyms.TabIndex = 14;
@@ -288,11 +333,12 @@
             this.txtTargets.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtTargets.Location = new System.Drawing.Point(3, 54);
+            this.txtTargets.Location = new System.Drawing.Point(3, 71);
             this.txtTargets.Multiline = true;
             this.txtTargets.Name = "txtTargets";
-            this.txtTargets.Size = new System.Drawing.Size(270, 860);
+            this.txtTargets.Size = new System.Drawing.Size(273, 700);
             this.txtTargets.TabIndex = 15;
+            this.txtTargets.TextChanged += new System.EventHandler(this.txtTargets_TextChanged);
             // 
             // splitContainerMaster
             // 
@@ -303,6 +349,7 @@
             // splitContainerMaster.Panel1
             // 
             this.splitContainerMaster.Panel1.AutoScroll = true;
+            this.splitContainerMaster.Panel1.Controls.Add(this.lblTargetCount);
             this.splitContainerMaster.Panel1.Controls.Add(this.label1);
             this.splitContainerMaster.Panel1.Controls.Add(this.txtTargets);
             this.splitContainerMaster.Panel1.Controls.Add(this.btnAddSynonyms);
@@ -310,37 +357,32 @@
             // splitContainerMaster.Panel2
             // 
             this.splitContainerMaster.Panel2.Controls.Add(this.splitContainerResults);
-            this.splitContainerMaster.Size = new System.Drawing.Size(1284, 914);
-            this.splitContainerMaster.SplitterDistance = 276;
+            this.splitContainerMaster.Size = new System.Drawing.Size(1301, 771);
+            this.splitContainerMaster.SplitterDistance = 279;
             this.splitContainerMaster.TabIndex = 16;
             // 
-            // toolStripLabel1
+            // lblTargetCount
             // 
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(36, 22);
-            this.toolStripLabel1.Text = "Filter:";
+            this.lblTargetCount.AutoSize = true;
+            this.lblTargetCount.Location = new System.Drawing.Point(14, 54);
+            this.lblTargetCount.Name = "lblTargetCount";
+            this.lblTargetCount.Size = new System.Drawing.Size(49, 13);
+            this.lblTargetCount.TabIndex = 16;
+            this.lblTargetCount.Text = "0 item(s)";
             // 
-            // toolStripLabel2
+            // ctxMenuFileNode
             // 
-            this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(34, 22);
-            this.toolStripLabel2.Text = "Path:";
+            this.ctxMenuFileNode.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuCopy});
+            this.ctxMenuFileNode.Name = "ctxMenuFileNode";
+            this.ctxMenuFileNode.Size = new System.Drawing.Size(103, 26);
             // 
-            // txtFilter
+            // mnuCopy
             // 
-            this.txtFilter.Name = "txtFilter";
-            this.txtFilter.Size = new System.Drawing.Size(100, 25);
-            // 
-            // toolStripLabel3
-            // 
-            this.toolStripLabel3.Name = "toolStripLabel3";
-            this.toolStripLabel3.Size = new System.Drawing.Size(69, 22);
-            this.toolStripLabel3.Text = "Search Text:";
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            this.mnuCopy.Name = "mnuCopy";
+            this.mnuCopy.Size = new System.Drawing.Size(102, 22);
+            this.mnuCopy.Text = "Copy";
+            this.mnuCopy.Click += new System.EventHandler(this.mnuCopy_Click);
             // 
             // txtFileViewer
             // 
@@ -354,7 +396,7 @@
             this.txtFileViewer.Name = "txtFileViewer";
             this.txtFileViewer.ReadOnly = true;
             this.txtFileViewer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.txtFileViewer.Size = new System.Drawing.Size(932, 441);
+            this.txtFileViewer.Size = new System.Drawing.Size(946, 368);
             this.txtFileViewer.TabIndex = 2;
             this.txtFileViewer.Text = "";
             this.txtFileViewer.Click += new System.EventHandler(this.txtFileViewer_Click);
@@ -373,23 +415,27 @@
             this.txtLineNumbers.Name = "txtLineNumbers";
             this.txtLineNumbers.ReadOnly = true;
             this.txtLineNumbers.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.txtLineNumbers.Size = new System.Drawing.Size(85, 441);
+            this.txtLineNumbers.Size = new System.Drawing.Size(85, 368);
             this.txtLineNumbers.TabIndex = 4;
             this.txtLineNumbers.Text = "";
             // 
             // tvMatches
             // 
-            this.tvMatches.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tvMatches.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.tvMatches.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
             this.tvMatches.FullRowSelect = true;
             this.tvMatches.HideSelection = false;
             this.tvMatches.LineColor = System.Drawing.Color.DimGray;
-            this.tvMatches.Location = new System.Drawing.Point(0, 0);
+            this.tvMatches.Location = new System.Drawing.Point(0, 27);
             this.tvMatches.Name = "tvMatches";
-            this.tvMatches.Size = new System.Drawing.Size(1004, 445);
+            this.tvMatches.Size = new System.Drawing.Size(1018, 348);
             this.tvMatches.TabIndex = 4;
             this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
             this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
+            this.tvMatches.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyDown);
+            this.tvMatches.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tvMatches_MouseDown);
             // 
             // MainForm
             // 
@@ -397,7 +443,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(1284, 961);
+            this.ClientSize = new System.Drawing.Size(1301, 818);
             this.Controls.Add(this.splitContainerMaster);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnSearch);
@@ -426,6 +472,7 @@
             this.splitContainerMaster.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMaster)).EndInit();
             this.splitContainerMaster.ResumeLayout(false);
+            this.ctxMenuFileNode.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -468,6 +515,10 @@
         private System.Windows.Forms.ToolStripTextBox txtFilter;
         private System.Windows.Forms.ToolStripLabel toolStripLabel3;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.Label lblTargetCount;
+        private System.Windows.Forms.ContextMenuStrip ctxMenuFileNode;
+        private System.Windows.Forms.ToolStripMenuItem mnuCopy;
+        private System.Windows.Forms.Button btnExpandCollapse;
     }
 }
 

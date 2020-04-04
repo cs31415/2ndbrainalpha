@@ -10,10 +10,19 @@ namespace _2ndbrainalpha
         {
         }
 
+        public void Copy()  { SendMessage(GetEditControl(), 0x301, IntPtr.Zero, IntPtr.Zero); }
+
         protected override void OnHandleCreated(EventArgs e)
         {
             SendMessage(this.Handle, TVM_SETEXTENDEDSTYLE, (IntPtr)TVS_EX_DOUBLEBUFFER, (IntPtr)TVS_EX_DOUBLEBUFFER);
             base.OnHandleCreated(e);
+        }
+
+        private IntPtr GetEditControl() {
+            // Use TVM_GETEDITCONTROL to get the handle of the edit box
+            IntPtr hEdit = SendMessage(this.Handle, 0x1100 + 15, IntPtr.Zero, IntPtr.Zero);
+            if (hEdit == IntPtr.Zero) throw new InvalidOperationException("Not currently editing a label");
+            return hEdit;
         }
 
         // Pinvoke:
@@ -21,5 +30,10 @@ namespace _2ndbrainalpha
         private const int TVS_EX_DOUBLEBUFFER = 0x0004;
         [DllImport("user32.dll")]
         private static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            base.OnMouseDown(e);
+        }
     }
 }
