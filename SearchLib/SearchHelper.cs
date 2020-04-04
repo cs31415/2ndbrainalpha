@@ -17,7 +17,7 @@ namespace SearchLib
 
         public Action<string> OnFile { get; }
         public Action<string, int> OnFileMatch { get; }
-        public Action<Match> OnMatch { get; }
+        public Action<Match, int> OnMatch { get; }
         public Action<string, Exception> OnException { get; }
         public Action OnComplete { get; }
 
@@ -25,7 +25,7 @@ namespace SearchLib
             Func<bool> checkForCancellation, 
             Action<string> onFile,
             Action<string, int> onFileMatch, 
-            Action<Match> onMatch, 
+            Action<Match, int> onMatch, 
             Action<string, Exception> onException,
             Action onComplete)
         {
@@ -71,6 +71,7 @@ namespace SearchLib
                     var text = await reader.ReadToEndAsync();
                     var lines = text.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
                     var currentLineNumber = 0;
+                    var nMatches = 0;
                     var matches = new List<Match>();
                     foreach (var line in lines)
                     {
@@ -79,29 +80,33 @@ namespace SearchLib
                             return;
                         }
 
-                        matches.AddRange(trie
-                            .Search(line)
-                            .Where(m =>
-                            {
-                                var chars = line.ToCharArray();
-                                var leftSpace = IsWhiteSpace(chars[Math.Max(m.Index - 1, 0)]);
-                                var rightSpace =
-                                    IsWhiteSpace(chars[Math.Min(m.Index + m.Word.Length, line.Length - 1)]);
-                                return leftSpace && rightSpace;
-                            })
-                            .Select(m => new Match(file, line, m.Word, currentLineNumber, m.Index))
-                            .ToList());
+                        matches.AddRange(                            
+                            trie
+                                .Search(line)
+                                .Where(m =>
+                                {
+                                    var chars = line.ToCharArray();
+                                    var leftSpace = IsWhiteSpace(chars[Math.Max(m.Index - 1, 0)]);
+                                    var rightSpace =
+                                        IsWhiteSpace(chars[Math.Min(m.Index + m.Word.Length, line.Length - 1)]);
+                                    return leftSpace && rightSpace;
+                                })
+                                .ToList()
+                                .Select(m => new Match(file, line, m.Word, currentLineNumber, m.Index))
+                            );
 
                         currentLineNumber++;
                     }
-
                     if (matches.Any())
                     {
-                        OnFileMatch(file, matches.Count);
+                        var count = matches.Count();
+                        OnFileMatch(file, count);
                     }
 
-                    matches
-                        .ForEach(m => OnMatch(m));
+                    foreach (var m in matches)
+                    {
+                        OnMatch(m, ++nMatches);
+                    }
                 }
             }
             catch (Exception ex)

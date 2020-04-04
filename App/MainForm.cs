@@ -26,6 +26,8 @@ namespace _2ndbrainalpha
         delegate void DelegateMethod(params object[] args);
         IList<string> _targets;
         string _settingsFileName;
+        private bool _expandedFirstNode;
+        Dictionary<string, TreeNode> _fileNodes;
 
         public int LineNumberOffset => LINE_NUMBER_LEN + 2;
 
@@ -38,6 +40,8 @@ namespace _2ndbrainalpha
             _searchHelper = new SearchHelper(CheckForCancellation, OnFile, OnFileMatch, OnMatch, OnException, OnComplete);
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _settingsFileName = $@"{path}\settings.txt";
+            _expandedFirstNode = false;
+            _fileNodes = new Dictionary<string, TreeNode>();
         }
 
         #region Event handlers
@@ -54,6 +58,8 @@ namespace _2ndbrainalpha
             _cancelled = false;
             tvMatches.Nodes.Clear();
             txtFileViewer.Text = "";
+            _expandedFirstNode = false;
+            _fileNodes.Clear();
 
             // Spin off thread to do the recon
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
@@ -180,10 +186,65 @@ namespace _2ndbrainalpha
             lblTargetCount.Text = $"{count} item{suffix}";
         }
 
+        private void mnuCopy_Click(object sender, EventArgs e)
+        {
+            CopySelectedNodeToClipboard(tvMatches);
+        }
+
+        private void tvMatches_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == (Keys.Control | Keys.C))
+            {
+                CopySelectedNodeToClipboard(tvMatches);
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        private void tvMatches_MouseDown(object sender, MouseEventArgs e)
+        {
+            // Make sure this is the right button.
+            if (e.Button != MouseButtons.Right) return;
+
+            // Select this node.
+            TreeNode node = tvMatches.GetNodeAt(e.X, e.Y);
+            tvMatches.SelectedNode = node;
+
+            // See if we got a node.
+            if (node == null) return;
+
+            ctxMenuFileNode.Show(tvMatches, new Point(e.X, e.Y));
+        }
+
+        private void btnExpandCollapse_Click(object sender, EventArgs e)
+        {
+            foreach (TreeNode node in tvMatches.Nodes)
+            {
+                var file = (string)node.Tag;
+                if (_fileNodes.ContainsKey(file))
+                {
+                    if (node.IsExpanded)
+                    {
+                        node.Collapse();
+                    }
+                    else
+                    {
+                        node.ExpandAll();
+                    }
+                }
+            }
+        }
         #endregion
 
         #region Private methods
-                private void SelectNode(TreeNode node)
+        private void CopySelectedNodeToClipboard(TreeView tv)
+        {
+            if (tvMatches.SelectedNode != null)
+            {
+                Clipboard.SetText(tv.SelectedNode.Text);
+            }
+        }
+
+        private void SelectNode(TreeNode node)
         {
             var match = node.Tag as SearchLib.Match;
             string file;
@@ -345,6 +406,18 @@ namespace _2ndbrainalpha
             }
         }
 
+        private void InvokeIfRequiredNoArgs(DelegateMethod method) 
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(method);
+            }
+            else
+            {
+                method();
+            }
+        }
+
         private void SetProgressBarValue(int value)
         {
             InvokeIfRequired(x => { progressBarFiles.Value = (int)x[0]; lblFileCount.Text = x[0].ToString(); }, value);
@@ -360,7 +433,14 @@ namespace _2ndbrainalpha
             var fAddFileToResults = 
                 new Action<string,int> ((f,c) =>
                 {
-                    var fileNode = tvMatches.Nodes.Add($"{f} ({c} items)");
+                    var label = $"{f} ({c} items)";
+                    var fileNode = tvMatches.Nodes.Add(label);
+
+                    if (!_fileNodes.ContainsKey(file))
+                    {
+                        _fileNodes.Add(file, fileNode);
+                    }
+
                     fileNode.Name = file;
                     fileNode.Tag = file;
                     if (tvMatches.SelectedNode == null && tvMatches.Nodes.Count > 0)
@@ -441,7 +521,7 @@ namespace _2ndbrainalpha
             AddFileToResults(file, count);
         }
 
-        private void OnMatch(SearchLib.Match match)
+        private void OnMatch(SearchLib.Match match, int matchCount)
         {
             var onMatch = new Action<SearchLib.Match>(x =>
             {
@@ -449,7 +529,11 @@ namespace _2ndbrainalpha
                 node.Tag = match;
                 var fileNode = tvMatches.Nodes.Find(match.File, false)[0];
                 fileNode.Nodes.Add(node);
-                tvMatches.ExpandAll();
+                if (fileNode.Nodes.Count == matchCount && !_expandedFirstNode)
+                {
+                    _expandedFirstNode = true;
+                    fileNode.Expand();
+                }
             });
             if (this.InvokeRequired)
             {
@@ -552,6 +636,7 @@ namespace _2ndbrainalpha
 
             UpdateLineNumbers();
         }
+
         #endregion
     }
 }
