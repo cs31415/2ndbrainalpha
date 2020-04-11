@@ -21,15 +21,11 @@ namespace _2ndbrainalpha
         bool _cancelled;
         SearchHelper _searchHelper;
         int _filesProcessed;
-        const int LINE_NUMBER_LEN = 5;
         string _currentFile;
         delegate void DelegateMethod(params object[] args);
-        IList<string> _targets;
         string _settingsFileName;
         private bool _expandedFirstNode;
         Dictionary<string, TreeNode> _fileNodes;
-
-        public int LineNumberOffset => LINE_NUMBER_LEN + 2;
 
         public IList<string> TargetWords => txtTargets.Text.Split('\n','\r')?.Select(w => w.Trim()).Where(w => w.Length > 0).Distinct().ToList() ?? new List<string>();
 
@@ -525,7 +521,7 @@ namespace _2ndbrainalpha
         {
             var onMatch = new Action<SearchLib.Match>(x =>
             {
-                var node = new TreeNode($"{x.Line} : ({1 + x.LineNumber},{1 + x.StartIndex})");
+                var node = new TreeNode($"({1 + x.LineNumber},{1 + x.StartIndex}): {x.Line}");
                 node.Tag = match;
                 var fileNode = tvMatches.Nodes.Find(match.File, false)[0];
                 fileNode.Nodes.Add(node);

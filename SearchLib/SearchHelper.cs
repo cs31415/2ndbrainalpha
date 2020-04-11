@@ -39,7 +39,7 @@ namespace SearchLib
 
         public void SearchFiles(string[] files, IList<string> words)
         {
-            var trie = new AhoCorasick(words);
+            var trie = new AhoCorasick(CharComparer.OrdinalIgnoreCase, words);
             if (files != null && files.Length > 0)
             {
                 var tasks = new List<Task>();
@@ -69,7 +69,8 @@ namespace SearchLib
                 using (var reader = new StreamReader(fs))
                 {
                     var text = await reader.ReadToEndAsync();
-                    var lines = text.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
+                    // TODO: StringSplitOptions.RemoveEmptyEntries is creating a problem with incorrect line numbers for matches!
+                    var lines = text.Split(new[] {'\n'});
                     var currentLineNumber = 0;
                     var nMatches = 0;
                     var matches = new List<Match>();
@@ -117,7 +118,7 @@ namespace SearchLib
 
         private bool IsWhiteSpace(char c)
         {
-            return string.IsNullOrWhiteSpace(c.ToString()) || Regex.IsMatch(c.ToString(), "[.,;\"{}]");
+            return string.IsNullOrWhiteSpace(c.ToString()) || Regex.IsMatch(c.ToString(), "[.,;\"'{}()-:]");
         }
     }
 }
