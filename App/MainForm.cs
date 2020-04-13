@@ -289,6 +289,7 @@ namespace _2ndbrainalpha
                     _lastHighlightLineStartIndex = match.LineStartIndex;
                     _lastHighlightLineEndIndex = match.LineEndIndex;
 
+                    // Scroll view if selection is out of visible range
                     if (match.Position > txtFileViewer.BottomVisibleCharIndex || match.Position < txtFileViewer.TopVisibleCharIndex)
                     {
                         txtFileViewer.ScrollToCaret();
