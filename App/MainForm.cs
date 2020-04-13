@@ -65,6 +65,8 @@ namespace _2ndbrainalpha
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
             var searchParams = new SearchParams {Path = txtPath.Text, Filter = txtFilter.Text, SearchPattern = txtSearch.Text, TargetWords = TargetWords};
             tSearch.Start(searchParams);
+
+            tvMatches.Focus();
         }
 
         private void btnSelectPath_Click(object sender, EventArgs e)
@@ -198,6 +200,18 @@ namespace _2ndbrainalpha
                 CopySelectedNodeToClipboard(tvMatches);
                 e.SuppressKeyPress = true;
             }
+            else
+            {
+                //SelectNode(tvMatches.SelectedNode, true);
+            }
+        }
+
+        private void tvMatches_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData != (Keys.Control | Keys.C))
+            {
+                SelectNode(tvMatches.SelectedNode, true);
+            }
         }
 
         private void tvMatches_MouseDown(object sender, MouseEventArgs e)
@@ -213,6 +227,11 @@ namespace _2ndbrainalpha
             if (node == null) return;
 
             ctxMenuFileNode.Show(tvMatches, new Point(e.X, e.Y));
+        }
+
+        private void txtFileViewer_SelectionChanged(object sender, EventArgs e)
+        {
+            lblSelection.Text = txtFileViewer.SelectedText.Length.ToString();
         }
 
         private void btnExpandCollapse_Click(object sender, EventArgs e)
@@ -246,6 +265,9 @@ namespace _2ndbrainalpha
 
         private void SelectNode(TreeNode node, bool scrollToCaret = false)
         {
+            if (node == null)
+                return;
+
             var match = node.Tag as SearchLib.Match;
             string file;
 
@@ -643,10 +665,5 @@ namespace _2ndbrainalpha
         }
 
         #endregion
-
-        private void txtFileViewer_SelectionChanged(object sender, EventArgs e)
-        {
-            lblSelection.Text = txtFileViewer.SelectedText.Length.ToString();
-        }
     }
 }

@@ -348,6 +348,7 @@
             this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
             this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
             this.tvMatches.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyDown);
+            this.tvMatches.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyUp);
             this.tvMatches.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tvMatches_MouseDown);
             // 
             // btnSearch
