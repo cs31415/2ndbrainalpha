@@ -59,6 +59,7 @@ namespace _2ndbrainalpha
             txtFileViewer.Text = "";
             _expandedFirstNode = false;
             _fileNodes.Clear();
+            _lastHighlightLineStartIndex = _lastHighlightLineEndIndex = 0;
 
             // Spin off thread to do the recon
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
@@ -280,7 +281,6 @@ namespace _2ndbrainalpha
                     // unhighlight previously highlighted line, if any
                     if (_lastHighlightLineStartIndex >= 0 && _lastHighlightLineEndIndex > 0)
                     {
-                        //txtFileViewer.DeselectAll();
                         HighlightSelection(_lastHighlightLineStartIndex, _lastHighlightLineEndIndex, txtFileViewer.BackColor);
                     }
 
@@ -289,7 +289,10 @@ namespace _2ndbrainalpha
                     _lastHighlightLineStartIndex = match.LineStartIndex;
                     _lastHighlightLineEndIndex = match.LineEndIndex;
 
-                    txtFileViewer.ScrollToCaret();
+                    if (match.Position > txtFileViewer.BottomVisibleCharIndex || match.Position < txtFileViewer.TopVisibleCharIndex)
+                    {
+                        txtFileViewer.ScrollToCaret();
+                    }
                 }
 
                 txtFileViewer.Select(match.Position, match.Word.Length);
@@ -517,6 +520,7 @@ namespace _2ndbrainalpha
 
         private void OnFileMatch(string file, int count)
         {
+            _lastHighlightLineStartIndex = _lastHighlightLineEndIndex = 0;
             AddFileToResults(file, count);
         }
 

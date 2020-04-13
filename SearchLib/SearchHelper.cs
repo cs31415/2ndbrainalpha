@@ -70,7 +70,6 @@ namespace SearchLib
                 {
                     var text = await reader.ReadToEndAsync();
                     // TODO: StringSplitOptions.RemoveEmptyEntries is creating a problem with incorrect line numbers for matches!
-                    //var lines = text.Split(new[] {'\n'});
                     var lines = text.Split(new[] {"\r\n", "\n", "\r"}, StringSplitOptions.None);
                     var currentLineNumber = 0;
                     var nMatches = 0;

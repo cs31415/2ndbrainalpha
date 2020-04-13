@@ -52,6 +52,9 @@ namespace _2ndbrainalpha
             }
         }
 
+        public int TopVisibleCharIndex => this.GetCharIndexFromPosition(new System.Drawing.Point(1, 1));
+        public int BottomVisibleCharIndex => this.GetCharIndexFromPosition(new System.Drawing.Point(this.Width - 1, this.Height - 1));
+
         private static bool scrolling;   // In case buddy tries to scroll us
         protected override void WndProc(ref Message m)
         {
