@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using Match = SearchLib.Match;
 
 namespace _2ndbrainalpha
 {
@@ -26,6 +27,8 @@ namespace _2ndbrainalpha
         string _settingsFileName;
         private bool _expandedFirstNode;
         Dictionary<string, TreeNode> _fileNodes;
+        private int _lastHighlightLineStartIndex;
+        private int _lastHighlightLineEndIndex;
 
         public IList<string> TargetWords => txtTargets.Text.Split('\n','\r')?.Select(w => w.Trim()).Where(w => w.Length > 0).Distinct().ToList() ?? new List<string>();
 
@@ -115,7 +118,7 @@ namespace _2ndbrainalpha
         private void tvMatches_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             var node = e.Node;
-            SelectNode(node);
+            SelectNode(node, true);
         }
 
         private void txtFileViewer_Click(object sender, EventArgs e)
@@ -240,7 +243,7 @@ namespace _2ndbrainalpha
             }
         }
 
-        private void SelectNode(TreeNode node)
+        private void SelectNode(TreeNode node, bool scrollToCaret = false)
         {
             var match = node.Tag as SearchLib.Match;
             string file;
@@ -248,6 +251,10 @@ namespace _2ndbrainalpha
             if (match == null)
             {
                 file = node.Tag as string;
+                foreach (TreeNode childNode in node.Nodes)
+                {
+                    SelectNode(childNode);
+                }
             }
             else
             {
@@ -259,43 +266,34 @@ namespace _2ndbrainalpha
                 return;
             }
 
-            int position = 0;
             // Load file if not already loaded
             if (file != _currentFile)
             {
                 _currentFile = file;
-                var lines = File.ReadAllLines(file);
-                var sb = new StringBuilder();
-
-                for (int n = 0; n < lines.Length; n++)
-                {
-                    var line = lines[n];
-                    sb.Append($"{line}{Environment.NewLine}");
-                    if (match != null && n < match.LineNumber)
-                    {
-                        position += line.Length + 1;
-                    }
-                }
-
-                txtFileViewer.Text = sb.ToString();
-            }
-            else
-            {
-                var lines = txtFileViewer.Text.Split(Environment.NewLine.ToCharArray());
-                for (int n = 0; n < lines.Length; n++)
-                {
-                    var line = lines[n];
-                    if (match != null && n < match.LineNumber)
-                    {
-                        position += line.Length + 1 /* for newline */;
-                    }
-                }
+                txtFileViewer.Text = File.ReadAllText(file);
             }
 
             if (match != null)
             {
-                position += match.StartIndex;
-                txtFileViewer.Select(position, match.Word.Length);
+                if (scrollToCaret)
+                {
+                    // unhighlight previously highlighted line, if any
+                    if (_lastHighlightLineStartIndex >= 0 && _lastHighlightLineEndIndex > 0)
+                    {
+                        //txtFileViewer.DeselectAll();
+                        HighlightSelection(_lastHighlightLineStartIndex, _lastHighlightLineEndIndex, txtFileViewer.BackColor);
+                    }
+
+                    // highlight line
+                    HighlightSelection(match.LineStartIndex, match.LineEndIndex, Color.LightGoldenrodYellow);
+                    _lastHighlightLineStartIndex = match.LineStartIndex;
+                    _lastHighlightLineEndIndex = match.LineEndIndex;
+
+                    txtFileViewer.ScrollToCaret();
+                }
+
+                txtFileViewer.Select(match.Position, match.Word.Length);
+                txtFileViewer.SelectionBackColor = Color.Orange;
             }
             else
             {
@@ -303,8 +301,13 @@ namespace _2ndbrainalpha
             }
 
             SetLineAndColumn();
-            txtFileViewer.SelectionBackColor = Color.Orange;
-            txtFileViewer.ScrollToCaret();
+        }
+
+        private void HighlightSelection(int startIndex, int endIndex, Color color)
+        {
+            Debug.WriteLine($"start index = {startIndex}, length = {endIndex - startIndex}");
+            txtFileViewer.Select(startIndex, endIndex - startIndex);
+            txtFileViewer.SelectionBackColor = color;
         }
 
         private void UpdateLineNumbers()
@@ -530,6 +533,7 @@ namespace _2ndbrainalpha
                     _expandedFirstNode = true;
                     fileNode.Expand();
                 }
+                SelectNode(node);
             });
             if (this.InvokeRequired)
             {
@@ -629,10 +633,15 @@ namespace _2ndbrainalpha
             }
             lblLineNumber.Text = found ? (lineNum + 1).ToString() : string.Empty;
             lblColumnNumber.Text = found ? col.ToString() : string.Empty;
-
+            lblPosition.Text = (txtFileViewer.SelectionStart + 1).ToString();
             UpdateLineNumbers();
         }
 
         #endregion
+
+        private void txtFileViewer_SelectionChanged(object sender, EventArgs e)
+        {
+            lblSelection.Text = txtFileViewer.SelectedText.Length.ToString();
+        }
     }
 }

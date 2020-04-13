@@ -70,10 +70,13 @@ namespace SearchLib
                 {
                     var text = await reader.ReadToEndAsync();
                     // TODO: StringSplitOptions.RemoveEmptyEntries is creating a problem with incorrect line numbers for matches!
-                    var lines = text.Split(new[] {'\n'});
+                    //var lines = text.Split(new[] {'\n'});
+                    var lines = text.Split(new[] {"\r\n", "\n", "\r"}, StringSplitOptions.None);
                     var currentLineNumber = 0;
                     var nMatches = 0;
                     var matches = new List<Match>();
+                    int position = 0;
+                    int endOfLinePosition = 0;
                     foreach (var line in lines)
                     {
                         if (_checkForCancellation())
@@ -81,21 +84,25 @@ namespace SearchLib
                             return;
                         }
 
+                        var carriageReturn = line.Length > 0 && line.ToCharArray()[line.Length - 1] == '\r';
+                        endOfLinePosition = position + line.Length + (carriageReturn ? 0 : 1);
+
                         matches.AddRange(                            
                             trie
                                 .Search(line)
                                 .Where(m =>
                                 {
                                     var chars = line.ToCharArray();
-                                    var leftSpace = IsWhiteSpace(chars[Math.Max(m.Index - 1, 0)]);
+                                    var leftSpace = m.Index == 0 || IsWhiteSpace(chars[Math.Max(m.Index - 1, 0)]);
                                     var rightSpace =
                                         IsWhiteSpace(chars[Math.Min(m.Index + m.Word.Length, line.Length - 1)]);
                                     return leftSpace && rightSpace;
                                 })
                                 .ToList()
-                                .Select(m => new Match(file, line, m.Word, currentLineNumber, m.Index))
+                                .Select(m => new Match(file, line, m.Word, currentLineNumber, m.Index, position + m.Index, position, endOfLinePosition))
                             );
 
+                        position = endOfLinePosition;
                         currentLineNumber++;
                     }
                     if (matches.Any())
