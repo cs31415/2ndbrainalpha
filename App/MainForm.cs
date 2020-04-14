@@ -29,6 +29,7 @@ namespace _2ndbrainalpha
         Dictionary<string, TreeNode> _fileNodes;
         private int _lastHighlightLineStartIndex;
         private int _lastHighlightLineEndIndex;
+        private int _lastSelectedLineNumber;
 
         public IList<string> TargetWords => txtTargets.Text.Split('\n','\r')?.Select(w => w.Trim()).Where(w => w.Length > 0).Distinct().ToList() ?? new List<string>();
 
@@ -60,6 +61,7 @@ namespace _2ndbrainalpha
             _expandedFirstNode = false;
             _fileNodes.Clear();
             _lastHighlightLineStartIndex = _lastHighlightLineEndIndex = 0;
+            _lastSelectedLineNumber = 0;
 
             // Spin off thread to do the recon
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
@@ -110,11 +112,12 @@ namespace _2ndbrainalpha
                     TargetWords
                     .ToArray();
 
-                DrawTextWithHighlightedWords(e.Node.Text,
-                                             wordsToHighlight.ToArray<string>(),
+                var node = e.Node;
+                var match = node.Tag as Match;
+
+                DrawTextWithHighlightedWords(node,
                                              e.Graphics,
-                                             e.Bounds,
-                                             (e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected);
+                                             e.Bounds);
             }
         }
 
@@ -273,7 +276,9 @@ namespace _2ndbrainalpha
 
             if (match == null)
             {
+                // file node
                 file = node.Tag as string;
+                UnhighlightPreviousSelectedLine(node);
                 foreach (TreeNode childNode in node.Nodes)
                 {
                     SelectNode(childNode);
@@ -281,6 +286,7 @@ namespace _2ndbrainalpha
             }
             else
             {
+                // match node
                 file = match.File;
             }
 
@@ -301,15 +307,13 @@ namespace _2ndbrainalpha
                 if (scrollToCaret)
                 {
                     // unhighlight previously highlighted line, if any
-                    if (_lastHighlightLineStartIndex >= 0 && _lastHighlightLineEndIndex > 0)
-                    {
-                        HighlightSelection(_lastHighlightLineStartIndex, _lastHighlightLineEndIndex, txtFileViewer.BackColor);
-                    }
+                    UnhighlightPreviousSelectedLine(node.Parent);
 
                     // highlight line
                     HighlightSelection(match.LineStartIndex, match.LineEndIndex, Color.LightGoldenrodYellow);
                     _lastHighlightLineStartIndex = match.LineStartIndex;
                     _lastHighlightLineEndIndex = match.LineEndIndex;
+                    _lastSelectedLineNumber = match.LineNumber;
 
                     // Scroll view if selection is out of visible range
                     if (match.Position > txtFileViewer.BottomVisibleCharIndex || match.Position < txtFileViewer.TopVisibleCharIndex)
@@ -327,6 +331,24 @@ namespace _2ndbrainalpha
             }
 
             SetLineAndColumn();
+        }
+
+        private void UnhighlightPreviousSelectedLine(TreeNode fileNode)
+        {
+            if (_lastHighlightLineStartIndex >= 0 && _lastHighlightLineEndIndex > 0)
+            {
+                HighlightSelection(_lastHighlightLineStartIndex, _lastHighlightLineEndIndex, txtFileViewer.BackColor);
+
+                // restore matched word highlights
+                foreach (TreeNode childNode in fileNode.Nodes)
+                {
+                    var m = childNode.Tag as Match;
+                    if (m.LineNumber == _lastSelectedLineNumber)
+                    {
+                        SelectNode(childNode);
+                    }
+                }
+            }
         }
 
         private void HighlightSelection(int startIndex, int endIndex, Color color)
@@ -544,6 +566,7 @@ namespace _2ndbrainalpha
         private void OnFileMatch(string file, int count)
         {
             _lastHighlightLineStartIndex = _lastHighlightLineEndIndex = 0;
+            _lastSelectedLineNumber = 0;
             AddFileToResults(file, count);
         }
 
@@ -580,8 +603,14 @@ namespace _2ndbrainalpha
         {
         }
 
-        private void DrawTextWithHighlightedWords(string text, string[] wordsToHighlight, Graphics g, Rectangle bounds, bool selected)
+        private void DrawTextWithHighlightedWords(TreeNode node, Graphics g, Rectangle bounds)
         {
+            string text = node.Text;
+            var match = node.Tag as Match;
+            string wordToHighlight = match.Word;
+            int startPosition = match?.StartIndex ?? 0;
+            int offset = ($"({match.LineNumber+1},{match.StartIndex+1}): ").Length;
+
             var textSize = GetTextSize(g, text);
 
             //Default location is the node bounds location.
@@ -592,24 +621,29 @@ namespace _2ndbrainalpha
 
             //Split text into substrings to highlight and not highlight.
             var words = Regex.Split(text, @"([,\s;\.\t\{\}\[\]()])").Where(w => w.Length > 0).ToArray();
-            var wordsWithHighlightStatus = Array.ConvertAll(words,
-                                                            (s) => Tuple.Create(s, wordsToHighlight.Contains(s)));
+            var wordsWithHighlightStatus = 
+                Array.ConvertAll(
+                    words,
+                    (s) => Tuple.Create(s, wordToHighlight.ToLower() == s.ToLower()));
 
+            var currentPos = 0;
             for (int i = 0; i < wordsWithHighlightStatus.Length; i++)
             {
                 var wordWithHighlightStatus = wordsWithHighlightStatus[i];
                 var word = wordWithHighlightStatus.Item1;
-                var highlight = wordWithHighlightStatus.Item2;
+                
                 var size = Size;
 
                 //Draw the current word.
                 size = GetTextSize(g, word);
+                var highlight = wordWithHighlightStatus.Item2 && (currentPos - offset) == startPosition ;
                 DrawText(g,
                      word,
                      location,
                      Color.Black,
                      highlight ? Color.Orange : Color.Transparent);
                 location.Offset(size.Width, 0);
+                currentPos += word.Length;
             }
         }
 
