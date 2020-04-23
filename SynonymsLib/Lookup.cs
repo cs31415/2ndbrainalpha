@@ -30,13 +30,9 @@ namespace SynonymsLib
                         var line = reader.ReadLine();
                         var words = line.Split('|');
                         var type = Regex.Replace(words[0], @"[()]", "");
-                        synonyms = synonyms.Concat(words.Skip(1).Select(w => new Entry { Type = type, Word = w })).ToList();
+                        synonyms = synonyms.Concat(words.Skip(1).Where(w => w.Trim() != word).Select(w => new Entry { Type = type.Trim(), Word = w.Trim() })).ToList();
                     }
                 }
-            }
-            if (!synonyms.Any(x => x.Word == word))
-            {
-                synonyms.Add(new Entry { Type = "word", Word = word });
             }
             return synonyms;
         }

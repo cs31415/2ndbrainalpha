@@ -6,7 +6,7 @@ namespace _2ndbrainalpha
     {
         public string Path { get; set; }
         public string Filter {get;set;}
-        public string SearchText { get; set; }
+        //public string SearchText { get; set; }
         public IList<string> TargetWords { get; set; }
         public string SelectedNode { get; set; }
     }

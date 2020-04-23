@@ -6,7 +6,7 @@ namespace _2ndbrainalpha
     {
         public string Path {get; set; }
         public string Filter {get;set;}
-        public string SearchPattern {get;set;}
+        //public string SearchPattern {get;set;}
         public IList<string> TargetWords {get;set;}
     }
 }

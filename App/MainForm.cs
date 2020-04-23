@@ -50,9 +50,9 @@ namespace _2ndbrainalpha
         #region Event handlers
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtSearch.Text) && string.IsNullOrWhiteSpace(txtTargets.Text)) 
+            if (/*string.IsNullOrWhiteSpace(txtSearch.Text) && */string.IsNullOrWhiteSpace(txtTargets.Text)) 
             {
-                MessageBox.Show("Enter a search term");
+                MessageBox.Show("Enter a search term(s)");
                 return;
             }
 
@@ -68,6 +68,26 @@ namespace _2ndbrainalpha
             _lastHighlightLineStartIndex = _lastHighlightLineEndIndex = 0;
             _lastSelectedLineNumber = 0;
             _matchResults.Clear();
+            _suspendFilters = true;
+
+            // populate list box
+            var lastTargets = new Dictionary<string, TargetWord>();
+            foreach (TargetWord targetWord in lbTargets.Items)
+            {
+                lastTargets.Add(targetWord.Word, targetWord);
+            }
+
+            lbTargets.Items.Clear();
+            foreach (var targetWord in TargetWords)
+            {
+                if (!lbTargets.Items.Cast<TargetWord>().Any(t => t.Word.ToLower() == targetWord.ToLower()))
+                {
+                    var matchCount = lastTargets.ContainsKey(targetWord) ? lastTargets[targetWord].MatchCount : 0;
+                    var idx = lbTargets.Items.Add(new TargetWord(targetWord, matchCount));
+                    lbTargets.SetItemChecked(idx, true);
+                }
+            }
+
             foreach (TargetWord targetWord in lbTargets.Items)
             {
                 targetWord.MatchCount = 0;
@@ -75,7 +95,7 @@ namespace _2ndbrainalpha
 
             // Spin off thread to do the recon
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
-            var searchParams = new SearchParams {Path = txtPath.Text, Filter = txtFilter.Text, SearchPattern = txtSearch.Text, TargetWords = TargetWords};
+            var searchParams = new SearchParams {Path = txtPath.Text, Filter = txtFilter.Text/*, SearchPattern = txtSearch.Text*/, TargetWords = TargetWords};
             tSearch.Start(searchParams);
 
             tvMatches.Focus();
@@ -156,25 +176,25 @@ namespace _2ndbrainalpha
 
         private void btnAddSynonyms_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtSearch.Text))
+            if (string.IsNullOrWhiteSpace(txtSynonynFor.Text))
             {
-                MessageBox.Show("Enter a search term");
+                MessageBox.Show("Enter a word");
                 return;
             }
 
-            var searchPattern = txtSearch.Text;
+            var searchPattern = txtSynonynFor.Text;
+            if (!TargetWords.Any(t => t.Equals(searchPattern, StringComparison.OrdinalIgnoreCase)))
+            {
+                AppendTextBoxText(txtTargets, searchPattern);
+            }
+
             var targetWords = TargetWords;
-            //if (!targetWords.Contains(searchPattern))
-            //{
-            //    targetWords.Add(searchPattern);
-            //    AppendTextBoxText(txtTargets, searchPattern);
-            //}
 
             // Look up synonym of search word
             var synonyms = Lookup.GetSynonyms(searchPattern).Select(s => s.Word).Distinct().ToList();
             foreach (var synonym in synonyms)
             {
-                if (!targetWords.Contains(synonym))
+                if (!targetWords.Any(t => t.Equals(synonym, StringComparison.OrdinalIgnoreCase)))
                 {
                     AppendTextBoxText(txtTargets, synonym);
                 }
@@ -267,20 +287,17 @@ namespace _2ndbrainalpha
             var count = TargetWords.Count;
             var suffix = count > 0 ? "s" : "";
             lblTargetCount.Text = $"{count} item{suffix}";
-
-            // populate list box
-            lbTargets.Items.Clear();
-            foreach (var targetWord in TargetWords)
-            {
-                var idx = lbTargets.Items.Add(new TargetWord(targetWord, 0));
-                lbTargets.SetItemChecked(idx, true);
-            }
         }
 
         private void lbTargets_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             this.BeginInvoke((MethodInvoker)delegate {
-                if (!_suspendFilters)
+                if (lbTargets.Items.Count == TargetWords.Count)
+                {
+                    _suspendFilters = false;
+                }
+
+                if (!_suspendFilters && ((TargetWord)lbTargets.Items[e.Index]).MatchCount > 0)
                 {
                     // filter tree view on selected indices
                     FilterMatches();
@@ -446,7 +463,7 @@ namespace _2ndbrainalpha
                 if (settings != null) {
                     txtPath.Text = settings.Path;
                     txtFilter.Text = settings.Filter;
-                    txtSearch.Text = settings.SearchText;
+                    //txtSearch.Text = settings.SearchText;
                     if (settings.TargetWords != null) {
                         foreach (var word in settings.TargetWords) {
                             AppendTextBoxText(txtTargets, word);
@@ -461,7 +478,7 @@ namespace _2ndbrainalpha
             var settings = new Settings();
             settings.Path = txtPath.Text;
             settings.Filter = txtFilter.Text;
-            settings.SearchText = txtSearch.Text;
+            //settings.SearchText = txtSearch.Text;
             settings.TargetWords = 
                 txtTargets
                     .Text
@@ -540,12 +557,12 @@ namespace _2ndbrainalpha
                 }
 
                 var targetWords = searchParams.TargetWords;
-                var searchPattern = searchParams.SearchPattern;
+                /*var searchPattern = searchParams.SearchPattern;
                 if (!string.IsNullOrWhiteSpace(searchPattern) && !targetWords.Contains(searchPattern)) 
                 {
                     targetWords.Add(searchPattern);
                     AppendTextBoxText(txtTargets, searchPattern);
-                }
+                }*/
 
                 var path = $"{searchParams.Path}";
                 if (!string.IsNullOrEmpty(path))
