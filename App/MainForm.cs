@@ -99,8 +99,6 @@ namespace _2ndbrainalpha
             tSearch.Start(searchParams);
 
             tvMatches.Focus();
-
-            btnCancel.Visible = false;
         }
 
         private void btnSelectPath_Click(object sender, EventArgs e)
@@ -586,15 +584,29 @@ namespace _2ndbrainalpha
 
         private bool CheckForCancellation()
         {
-            Thread.Sleep(0);
+            //Thread.Sleep(0);
             return _cancelled;
         }
 
         private void OnFile(string file)
         {
             SetProgressBarValue(++_filesProcessed);
+            InvokeIfRequired(x =>
+            {
+                int filesProcessed = 0;
+                int fileCount = 0;
+                int.TryParse(lblFileCount.Text, out filesProcessed);
+                int.TryParse(lblMaxFileCount.Text, out fileCount);
+                if (filesProcessed == fileCount)
+                {
+                    btnCancel.Visible = false;
+                }
+            }, null);
             if (_cancelled)
             {
+                InvokeIfRequired(x => {
+                    btnCancel.Visible = false;
+                },  null);
                 SetStatusTxt("Search was canceled.");
                 return;
             }

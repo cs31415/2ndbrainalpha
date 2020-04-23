@@ -45,6 +45,11 @@ namespace SearchLib
                 var tasks = new List<Task>();
                 foreach (var file in files)
                 {
+                    if (_checkForCancellation())
+                    {
+                        return;
+                    }
+
                     OnFile(file);
                     Action search = async () => await SearchFile(file, trie);
                     tasks.Add(Task.Run(search));
