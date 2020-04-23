@@ -31,6 +31,7 @@ namespace _2ndbrainalpha
         private int _lastHighlightLineEndIndex;
         private int _lastSelectedLineNumber;
         private Dictionary<string, FileMatchData> _matchResults;
+        private bool _suspendFilters;
 
         public IList<string> TargetWords => txtTargets.Text.Split('\n','\r')?.Select(w => w.Trim()).Where(w => w.Length > 0).Distinct().ToList() ?? new List<string>();
 
@@ -55,6 +56,8 @@ namespace _2ndbrainalpha
                 return;
             }
 
+            btnCancel.Visible = true;
+
             _currentFile = null;
             _filesProcessed = 0;
             _cancelled = false;
@@ -76,6 +79,8 @@ namespace _2ndbrainalpha
             tSearch.Start(searchParams);
 
             tvMatches.Focus();
+
+            btnCancel.Visible = false;
         }
 
         private void btnSelectPath_Click(object sender, EventArgs e)
@@ -237,20 +242,21 @@ namespace _2ndbrainalpha
             lblSelection.Text = txtFileViewer.SelectedText.Length.ToString();
         }
 
-        private void btnExpandCollapse_Click(object sender, EventArgs e)
+        private void cbExpandAll_CheckedChanged(object sender, EventArgs e)
         {
+            var expandAll = cbExpandAll.Checked;
             foreach (TreeNode node in tvMatches.Nodes)
             {
                 var file = (string)node.Tag;
                 if (_fileNodes.ContainsKey(file))
                 {
-                    if (node.IsExpanded)
+                    if (expandAll)
                     {
-                        node.Collapse();
+                        node.ExpandAll();
                     }
                     else
                     {
-                        node.ExpandAll();
+                        node.Collapse();
                     }
                 }
             }
@@ -274,10 +280,32 @@ namespace _2ndbrainalpha
         private void lbTargets_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             this.BeginInvoke((MethodInvoker)delegate {
-                // filter tree view on selected indices
-                FilterMatches();
-                tvMatches.Invalidate();
+                if (!_suspendFilters)
+                {
+                    // filter tree view on selected indices
+                    FilterMatches();
+                    tvMatches.Invalidate();
+                }
             });
+        }
+
+        private void cbTargetsToggle_CheckedChanged(object sender, EventArgs e)
+        {
+            txtFileViewer.SuspendLayout();
+            txtLineNumbers.SuspendLayout();
+            //tvMatches.SuspendLayout();
+            _suspendFilters = true;
+            for (int i=0; i < lbTargets.Items.Count; i++)
+            {
+                lbTargets.SetItemChecked(i, cbTargetsToggle.Checked);
+            }
+            // filter tree view on selected indices
+            FilterMatches();
+            tvMatches.Invalidate();
+            _suspendFilters = false;
+            //tvMatches.ResumeLayout();
+            txtFileViewer.ResumeLayout();
+            txtLineNumbers.ResumeLayout();
         }
         #endregion
 
@@ -305,7 +333,7 @@ namespace _2ndbrainalpha
                 UnhighlightPreviousSelectedLine(node);
                 foreach (TreeNode childNode in node.Nodes)
                 {
-                    SelectNode(childNode);
+                    SelectNode(childNode, scrollToCaret);
                 }
             }
             else
@@ -596,7 +624,7 @@ namespace _2ndbrainalpha
                 var fileMatchData = _matchResults[match.File];
                 fileMatchData.Matches.Add(match);
             }
-            AddMatchToResults(match, matchCount);
+            AddMatchToResults(match, matchCount, true);
         }
 
         private void AddFileToResults(string file, int count)
@@ -639,7 +667,7 @@ namespace _2ndbrainalpha
             }
         }
 
-        private void AddMatchToResults(Match match, int matchCount)
+        private void AddMatchToResults(Match match, int matchCount, bool selectNode=false)
         {
             var onMatch = new Action<SearchLib.Match>(x =>
             {
@@ -656,7 +684,10 @@ namespace _2ndbrainalpha
                         fileNode.Expand();
                     }
 
-                    SelectNode(node);
+                    if (selectNode)
+                    {
+                        SelectNode(node);
+                    }
                 }
             });
 
@@ -694,7 +725,7 @@ namespace _2ndbrainalpha
                             AddFileToResults(file, filteredMatchCount);
                             addedFile = true;
                         }
-                        AddMatchToResults(match, filteredMatchCount);
+                        AddMatchToResults(match, filteredMatchCount, false);
                     }
                 }
             }

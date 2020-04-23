@@ -60,7 +60,6 @@
             this.lblPosition = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel7 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblSelection = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btnExpandCollapse = new System.Windows.Forms.Button();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -72,6 +71,8 @@
             this.lbTargets = new System.Windows.Forms.CheckedListBox();
             this.ctxMenuFileNode = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuCopy = new System.Windows.Forms.ToolStripMenuItem();
+            this.cbTargetsToggle = new System.Windows.Forms.CheckBox();
+            this.cbExpandAll = new System.Windows.Forms.CheckBox();
             this.txtFileViewer = new _2ndbrainalpha.SyncTextBox();
             this.txtLineNumbers = new _2ndbrainalpha.SyncTextBox();
             this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
@@ -247,7 +248,7 @@
             // splitContainerResults.Panel2
             // 
             this.splitContainerResults.Panel2.AutoScroll = true;
-            this.splitContainerResults.Panel2.Controls.Add(this.btnExpandCollapse);
+            this.splitContainerResults.Panel2.Controls.Add(this.cbExpandAll);
             this.splitContainerResults.Panel2.Controls.Add(this.tvMatches);
             this.splitContainerResults.Size = new System.Drawing.Size(1018, 771);
             this.splitContainerResults.SplitterDistance = 392;
@@ -314,16 +315,6 @@
             this.lblSelection.Name = "lblSelection";
             this.lblSelection.Size = new System.Drawing.Size(0, 17);
             // 
-            // btnExpandCollapse
-            // 
-            this.btnExpandCollapse.Location = new System.Drawing.Point(0, 3);
-            this.btnExpandCollapse.Name = "btnExpandCollapse";
-            this.btnExpandCollapse.Size = new System.Drawing.Size(75, 23);
-            this.btnExpandCollapse.TabIndex = 5;
-            this.btnExpandCollapse.Text = "Expand/Collapse";
-            this.btnExpandCollapse.UseVisualStyleBackColor = true;
-            this.btnExpandCollapse.Click += new System.EventHandler(this.btnExpandCollapse_Click);
-            // 
             // btnSearch
             // 
             this.btnSearch.Location = new System.Drawing.Point(989, 2);
@@ -343,6 +334,7 @@
             this.btnCancel.TabIndex = 7;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Visible = false;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // label1
@@ -372,6 +364,7 @@
             this.txtTargets.Location = new System.Drawing.Point(4, 68);
             this.txtTargets.Multiline = true;
             this.txtTargets.Name = "txtTargets";
+            this.txtTargets.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtTargets.Size = new System.Drawing.Size(273, 348);
             this.txtTargets.TabIndex = 15;
             this.txtTargets.TextChanged += new System.EventHandler(this.txtTargets_TextChanged);
@@ -410,6 +403,7 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.cbTargetsToggle);
             this.splitContainer1.Panel2.Controls.Add(this.lbTargets);
             this.splitContainer1.Size = new System.Drawing.Size(279, 771);
             this.splitContainer1.SplitterDistance = 419;
@@ -431,9 +425,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lbTargets.CheckOnClick = true;
             this.lbTargets.FormattingEnabled = true;
-            this.lbTargets.Location = new System.Drawing.Point(4, 1);
+            this.lbTargets.Location = new System.Drawing.Point(4, 18);
             this.lbTargets.Name = "lbTargets";
-            this.lbTargets.Size = new System.Drawing.Size(275, 344);
+            this.lbTargets.Size = new System.Drawing.Size(275, 327);
             this.lbTargets.TabIndex = 0;
             this.lbTargets.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lbTargets_ItemCheck);
             // 
@@ -450,6 +444,30 @@
             this.mnuCopy.Size = new System.Drawing.Size(102, 22);
             this.mnuCopy.Text = "Copy";
             this.mnuCopy.Click += new System.EventHandler(this.mnuCopy_Click);
+            // 
+            // cbTargetsToggle
+            // 
+            this.cbTargetsToggle.AutoSize = true;
+            this.cbTargetsToggle.Checked = true;
+            this.cbTargetsToggle.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbTargetsToggle.Location = new System.Drawing.Point(7, 1);
+            this.cbTargetsToggle.Name = "cbTargetsToggle";
+            this.cbTargetsToggle.Size = new System.Drawing.Size(121, 17);
+            this.cbTargetsToggle.TabIndex = 1;
+            this.cbTargetsToggle.Text = "Check/Uncheck All";
+            this.cbTargetsToggle.UseVisualStyleBackColor = true;
+            this.cbTargetsToggle.CheckedChanged += new System.EventHandler(this.cbTargetsToggle_CheckedChanged);
+            // 
+            // cbExpandAll
+            // 
+            this.cbExpandAll.AutoSize = true;
+            this.cbExpandAll.Location = new System.Drawing.Point(4, 4);
+            this.cbExpandAll.Name = "cbExpandAll";
+            this.cbExpandAll.Size = new System.Drawing.Size(125, 17);
+            this.cbExpandAll.TabIndex = 6;
+            this.cbExpandAll.Text = "Expand/collapse all";
+            this.cbExpandAll.UseVisualStyleBackColor = true;
+            this.cbExpandAll.CheckedChanged += new System.EventHandler(this.cbExpandAll_CheckedChanged);
             // 
             // txtFileViewer
             // 
@@ -532,6 +550,7 @@
             this.splitContainerResults.Panel1.ResumeLayout(false);
             this.splitContainerResults.Panel1.PerformLayout();
             this.splitContainerResults.Panel2.ResumeLayout(false);
+            this.splitContainerResults.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).EndInit();
             this.splitContainerResults.ResumeLayout(false);
             this.statusStripResults.ResumeLayout(false);
@@ -543,6 +562,7 @@
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.ctxMenuFileNode.ResumeLayout(false);
@@ -591,13 +611,14 @@
         private System.Windows.Forms.Label lblTargetCount;
         private System.Windows.Forms.ContextMenuStrip ctxMenuFileNode;
         private System.Windows.Forms.ToolStripMenuItem mnuCopy;
-        private System.Windows.Forms.Button btnExpandCollapse;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel6;
         private System.Windows.Forms.ToolStripStatusLabel lblPosition;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel7;
         private System.Windows.Forms.ToolStripStatusLabel lblSelection;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.CheckedListBox lbTargets;
+        private System.Windows.Forms.CheckBox cbTargetsToggle;
+        private System.Windows.Forms.CheckBox cbExpandAll;
     }
 }
 
