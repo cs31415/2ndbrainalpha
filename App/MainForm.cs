@@ -285,8 +285,7 @@ namespace _2ndbrainalpha
         private void txtTargets_TextChanged(object sender, EventArgs e)
         {
             var count = TargetWords.Count;
-            var suffix = count > 0 ? "s" : "";
-            lblTargetCount.Text = $"{count} item{suffix}";
+            lblTargetCount.Text = $"{count} item(s)";
         }
 
         private void lbTargets_ItemCheck(object sender, ItemCheckEventArgs e)

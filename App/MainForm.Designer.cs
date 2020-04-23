@@ -31,9 +31,10 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.btnSelectPath = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.txtPath = new System.Windows.Forms.ToolStripTextBox();
-            this.btnSelectPath = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.txtFilter = new System.Windows.Forms.ToolStripTextBox();
@@ -57,6 +58,7 @@
             this.lblPosition = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel7 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblSelection = new System.Windows.Forms.ToolStripStatusLabel();
+            this.cbExpandAll = new System.Windows.Forms.CheckBox();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -64,17 +66,15 @@
             this.txtTargets = new System.Windows.Forms.TextBox();
             this.splitContainerMaster = new System.Windows.Forms.SplitContainer();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.txtSynonynFor = new System.Windows.Forms.TextBox();
             this.lblTargetCount = new System.Windows.Forms.Label();
+            this.cbTargetsToggle = new System.Windows.Forms.CheckBox();
             this.lbTargets = new System.Windows.Forms.CheckedListBox();
             this.ctxMenuFileNode = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuCopy = new System.Windows.Forms.ToolStripMenuItem();
-            this.cbTargetsToggle = new System.Windows.Forms.CheckBox();
-            this.cbExpandAll = new System.Windows.Forms.CheckBox();
-            this.txtSynonynFor = new System.Windows.Forms.TextBox();
             this.txtFileViewer = new _2ndbrainalpha.SyncTextBox();
             this.txtLineNumbers = new _2ndbrainalpha.SyncTextBox();
             this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStrip1.SuspendLayout();
             this.statusStripBottom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).BeginInit();
@@ -110,6 +110,22 @@
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
+            // btnSelectPath
+            // 
+            this.btnSelectPath.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnSelectPath.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSelectPath.Image = ((System.Drawing.Image)(resources.GetObject("btnSelectPath.Image")));
+            this.btnSelectPath.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnSelectPath.Name = "btnSelectPath";
+            this.btnSelectPath.Size = new System.Drawing.Size(57, 22);
+            this.btnSelectPath.Text = "Browse...";
+            this.btnSelectPath.Click += new System.EventHandler(this.btnSelectPath_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            // 
             // toolStripLabel2
             // 
             this.toolStripLabel2.Name = "toolStripLabel2";
@@ -122,17 +138,6 @@
             this.txtPath.Name = "txtPath";
             this.txtPath.Size = new System.Drawing.Size(350, 25);
             this.txtPath.Text = "W:\\Writings";
-            // 
-            // btnSelectPath
-            // 
-            this.btnSelectPath.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnSelectPath.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSelectPath.Image = ((System.Drawing.Image)(resources.GetObject("btnSelectPath.Image")));
-            this.btnSelectPath.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnSelectPath.Name = "btnSelectPath";
-            this.btnSelectPath.Size = new System.Drawing.Size(57, 22);
-            this.btnSelectPath.Text = "Browse...";
-            this.btnSelectPath.Click += new System.EventHandler(this.btnSelectPath_Click);
             // 
             // toolStripSeparator1
             // 
@@ -296,6 +301,17 @@
             this.lblSelection.Name = "lblSelection";
             this.lblSelection.Size = new System.Drawing.Size(0, 17);
             // 
+            // cbExpandAll
+            // 
+            this.cbExpandAll.AutoSize = true;
+            this.cbExpandAll.Location = new System.Drawing.Point(4, 4);
+            this.cbExpandAll.Name = "cbExpandAll";
+            this.cbExpandAll.Size = new System.Drawing.Size(125, 17);
+            this.cbExpandAll.TabIndex = 6;
+            this.cbExpandAll.Text = "Expand/collapse all";
+            this.cbExpandAll.UseVisualStyleBackColor = true;
+            this.cbExpandAll.CheckedChanged += new System.EventHandler(this.cbExpandAll_CheckedChanged);
+            // 
             // btnSearch
             // 
             this.btnSearch.Location = new System.Drawing.Point(609, 1);
@@ -321,7 +337,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 9);
+            this.label1.Location = new System.Drawing.Point(6, 6);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(76, 13);
             this.label1.TabIndex = 9;
@@ -329,7 +345,7 @@
             // 
             // btnAddSynonyms
             // 
-            this.btnAddSynonyms.Location = new System.Drawing.Point(161, 25);
+            this.btnAddSynonyms.Location = new System.Drawing.Point(161, 23);
             this.btnAddSynonyms.Name = "btnAddSynonyms";
             this.btnAddSynonyms.Size = new System.Drawing.Size(104, 23);
             this.btnAddSynonyms.TabIndex = 14;
@@ -392,14 +408,34 @@
             this.splitContainer1.SplitterDistance = 419;
             this.splitContainer1.TabIndex = 0;
             // 
+            // txtSynonynFor
+            // 
+            this.txtSynonynFor.Location = new System.Drawing.Point(7, 23);
+            this.txtSynonynFor.Name = "txtSynonynFor";
+            this.txtSynonynFor.Size = new System.Drawing.Size(148, 22);
+            this.txtSynonynFor.TabIndex = 17;
+            // 
             // lblTargetCount
             // 
             this.lblTargetCount.AutoSize = true;
-            this.lblTargetCount.Location = new System.Drawing.Point(14, 52);
+            this.lblTargetCount.Location = new System.Drawing.Point(6, 50);
             this.lblTargetCount.Name = "lblTargetCount";
             this.lblTargetCount.Size = new System.Drawing.Size(49, 13);
             this.lblTargetCount.TabIndex = 16;
             this.lblTargetCount.Text = "0 item(s)";
+            // 
+            // cbTargetsToggle
+            // 
+            this.cbTargetsToggle.AutoSize = true;
+            this.cbTargetsToggle.Checked = true;
+            this.cbTargetsToggle.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbTargetsToggle.Location = new System.Drawing.Point(7, 1);
+            this.cbTargetsToggle.Name = "cbTargetsToggle";
+            this.cbTargetsToggle.Size = new System.Drawing.Size(121, 17);
+            this.cbTargetsToggle.TabIndex = 1;
+            this.cbTargetsToggle.Text = "Check/Uncheck All";
+            this.cbTargetsToggle.UseVisualStyleBackColor = true;
+            this.cbTargetsToggle.CheckedChanged += new System.EventHandler(this.cbTargetsToggle_CheckedChanged);
             // 
             // lbTargets
             // 
@@ -427,37 +463,6 @@
             this.mnuCopy.Size = new System.Drawing.Size(102, 22);
             this.mnuCopy.Text = "Copy";
             this.mnuCopy.Click += new System.EventHandler(this.mnuCopy_Click);
-            // 
-            // cbTargetsToggle
-            // 
-            this.cbTargetsToggle.AutoSize = true;
-            this.cbTargetsToggle.Checked = true;
-            this.cbTargetsToggle.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbTargetsToggle.Location = new System.Drawing.Point(7, 1);
-            this.cbTargetsToggle.Name = "cbTargetsToggle";
-            this.cbTargetsToggle.Size = new System.Drawing.Size(121, 17);
-            this.cbTargetsToggle.TabIndex = 1;
-            this.cbTargetsToggle.Text = "Check/Uncheck All";
-            this.cbTargetsToggle.UseVisualStyleBackColor = true;
-            this.cbTargetsToggle.CheckedChanged += new System.EventHandler(this.cbTargetsToggle_CheckedChanged);
-            // 
-            // cbExpandAll
-            // 
-            this.cbExpandAll.AutoSize = true;
-            this.cbExpandAll.Location = new System.Drawing.Point(4, 4);
-            this.cbExpandAll.Name = "cbExpandAll";
-            this.cbExpandAll.Size = new System.Drawing.Size(125, 17);
-            this.cbExpandAll.TabIndex = 6;
-            this.cbExpandAll.Text = "Expand/collapse all";
-            this.cbExpandAll.UseVisualStyleBackColor = true;
-            this.cbExpandAll.CheckedChanged += new System.EventHandler(this.cbExpandAll_CheckedChanged);
-            // 
-            // txtSynonynFor
-            // 
-            this.txtSynonynFor.Location = new System.Drawing.Point(7, 25);
-            this.txtSynonynFor.Name = "txtSynonynFor";
-            this.txtSynonynFor.Size = new System.Drawing.Size(148, 22);
-            this.txtSynonynFor.TabIndex = 17;
             // 
             // txtFileViewer
             // 
@@ -513,11 +518,6 @@
             this.tvMatches.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyDown);
             this.tvMatches.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyUp);
             this.tvMatches.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tvMatches_MouseDown);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
             // MainForm
             // 
