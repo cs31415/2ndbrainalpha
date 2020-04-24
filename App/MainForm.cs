@@ -584,7 +584,7 @@ namespace _2ndbrainalpha
 
         private bool CheckForCancellation()
         {
-            //Thread.Sleep(0);
+            Thread.Sleep(0);
             return _cancelled;
         }
 
