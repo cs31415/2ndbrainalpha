@@ -65,7 +65,7 @@
             this.btnAddSynonyms = new System.Windows.Forms.Button();
             this.txtTargets = new System.Windows.Forms.TextBox();
             this.splitContainerMaster = new System.Windows.Forms.SplitContainer();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.splitContainerSideBar = new System.Windows.Forms.SplitContainer();
             this.txtSynonynFor = new System.Windows.Forms.TextBox();
             this.lblTargetCount = new System.Windows.Forms.Label();
             this.cbTargetsToggle = new System.Windows.Forms.CheckBox();
@@ -86,10 +86,10 @@
             this.splitContainerMaster.Panel1.SuspendLayout();
             this.splitContainerMaster.Panel2.SuspendLayout();
             this.splitContainerMaster.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerSideBar)).BeginInit();
+            this.splitContainerSideBar.Panel1.SuspendLayout();
+            this.splitContainerSideBar.Panel2.SuspendLayout();
+            this.splitContainerSideBar.SuspendLayout();
             this.ctxMenuFileNode.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -219,7 +219,9 @@
             // 
             // splitContainerResults
             // 
-            this.splitContainerResults.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerResults.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.splitContainerResults.Location = new System.Drawing.Point(0, 0);
             this.splitContainerResults.Name = "splitContainerResults";
             this.splitContainerResults.Orientation = System.Windows.Forms.Orientation.Horizontal;
@@ -345,7 +347,7 @@
             // 
             // btnAddSynonyms
             // 
-            this.btnAddSynonyms.Location = new System.Drawing.Point(161, 23);
+            this.btnAddSynonyms.Location = new System.Drawing.Point(159, 23);
             this.btnAddSynonyms.Name = "btnAddSynonyms";
             this.btnAddSynonyms.Size = new System.Drawing.Size(104, 23);
             this.btnAddSynonyms.TabIndex = 14;
@@ -363,7 +365,7 @@
             this.txtTargets.Multiline = true;
             this.txtTargets.Name = "txtTargets";
             this.txtTargets.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtTargets.Size = new System.Drawing.Size(273, 348);
+            this.txtTargets.Size = new System.Drawing.Size(273, 301);
             this.txtTargets.TabIndex = 15;
             this.txtTargets.TextChanged += new System.EventHandler(this.txtTargets_TextChanged);
             // 
@@ -376,7 +378,7 @@
             // splitContainerMaster.Panel1
             // 
             this.splitContainerMaster.Panel1.AutoScroll = true;
-            this.splitContainerMaster.Panel1.Controls.Add(this.splitContainer1);
+            this.splitContainerMaster.Panel1.Controls.Add(this.splitContainerSideBar);
             // 
             // splitContainerMaster.Panel2
             // 
@@ -385,32 +387,32 @@
             this.splitContainerMaster.SplitterDistance = 279;
             this.splitContainerMaster.TabIndex = 16;
             // 
-            // splitContainer1
+            // splitContainerSideBar
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.splitContainerSideBar.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainerSideBar.Location = new System.Drawing.Point(0, 0);
+            this.splitContainerSideBar.Name = "splitContainerSideBar";
+            this.splitContainerSideBar.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // splitContainer1.Panel1
+            // splitContainerSideBar.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.txtSynonynFor);
-            this.splitContainer1.Panel1.Controls.Add(this.btnAddSynonyms);
-            this.splitContainer1.Panel1.Controls.Add(this.lblTargetCount);
-            this.splitContainer1.Panel1.Controls.Add(this.txtTargets);
-            this.splitContainer1.Panel1.Controls.Add(this.label1);
+            this.splitContainerSideBar.Panel1.Controls.Add(this.txtSynonynFor);
+            this.splitContainerSideBar.Panel1.Controls.Add(this.btnAddSynonyms);
+            this.splitContainerSideBar.Panel1.Controls.Add(this.lblTargetCount);
+            this.splitContainerSideBar.Panel1.Controls.Add(this.txtTargets);
+            this.splitContainerSideBar.Panel1.Controls.Add(this.label1);
             // 
-            // splitContainer1.Panel2
+            // splitContainerSideBar.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.cbTargetsToggle);
-            this.splitContainer1.Panel2.Controls.Add(this.lbTargets);
-            this.splitContainer1.Size = new System.Drawing.Size(279, 771);
-            this.splitContainer1.SplitterDistance = 419;
-            this.splitContainer1.TabIndex = 0;
+            this.splitContainerSideBar.Panel2.Controls.Add(this.cbTargetsToggle);
+            this.splitContainerSideBar.Panel2.Controls.Add(this.lbTargets);
+            this.splitContainerSideBar.Size = new System.Drawing.Size(279, 771);
+            this.splitContainerSideBar.SplitterDistance = 372;
+            this.splitContainerSideBar.TabIndex = 0;
             // 
             // txtSynonynFor
             // 
-            this.txtSynonynFor.Location = new System.Drawing.Point(7, 23);
+            this.txtSynonynFor.Location = new System.Drawing.Point(5, 23);
             this.txtSynonynFor.Name = "txtSynonynFor";
             this.txtSynonynFor.Size = new System.Drawing.Size(148, 22);
             this.txtSynonynFor.TabIndex = 17;
@@ -429,7 +431,7 @@
             this.cbTargetsToggle.AutoSize = true;
             this.cbTargetsToggle.Checked = true;
             this.cbTargetsToggle.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbTargetsToggle.Location = new System.Drawing.Point(7, 1);
+            this.cbTargetsToggle.Location = new System.Drawing.Point(3, 2);
             this.cbTargetsToggle.Name = "cbTargetsToggle";
             this.cbTargetsToggle.Size = new System.Drawing.Size(121, 17);
             this.cbTargetsToggle.TabIndex = 1;
@@ -444,9 +446,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lbTargets.CheckOnClick = true;
             this.lbTargets.FormattingEnabled = true;
-            this.lbTargets.Location = new System.Drawing.Point(4, 18);
+            this.lbTargets.Location = new System.Drawing.Point(2, 19);
             this.lbTargets.Name = "lbTargets";
-            this.lbTargets.Size = new System.Drawing.Size(275, 327);
+            this.lbTargets.Size = new System.Drawing.Size(275, 378);
             this.lbTargets.TabIndex = 0;
             this.lbTargets.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lbTargets_ItemCheck);
             // 
@@ -555,12 +557,12 @@
             this.splitContainerMaster.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerMaster)).EndInit();
             this.splitContainerMaster.ResumeLayout(false);
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel1.PerformLayout();
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            this.splitContainer1.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
+            this.splitContainerSideBar.Panel1.ResumeLayout(false);
+            this.splitContainerSideBar.Panel1.PerformLayout();
+            this.splitContainerSideBar.Panel2.ResumeLayout(false);
+            this.splitContainerSideBar.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainerSideBar)).EndInit();
+            this.splitContainerSideBar.ResumeLayout(false);
             this.ctxMenuFileNode.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -608,7 +610,7 @@
         private System.Windows.Forms.ToolStripStatusLabel lblPosition;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel7;
         private System.Windows.Forms.ToolStripStatusLabel lblSelection;
-        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.SplitContainer splitContainerSideBar;
         private System.Windows.Forms.CheckedListBox lbTargets;
         private System.Windows.Forms.CheckBox cbTargetsToggle;
         private System.Windows.Forms.CheckBox cbExpandAll;
