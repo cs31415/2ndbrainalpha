@@ -49,8 +49,6 @@
             this.lblMaxFileCount = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainerResults = new System.Windows.Forms.SplitContainer();
-            this.txtFileViewer = new _2ndbrainalpha.SyncTextBox();
-            this.txtLineNumbers = new _2ndbrainalpha.SyncTextBox();
             this.statusStripResults = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblLineNumber = new System.Windows.Forms.ToolStripStatusLabel();
@@ -61,7 +59,6 @@
             this.toolStripStatusLabel7 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblSelection = new System.Windows.Forms.ToolStripStatusLabel();
             this.cbExpandAll = new System.Windows.Forms.CheckBox();
-            this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -75,6 +72,9 @@
             this.lbTargets = new System.Windows.Forms.CheckedListBox();
             this.ctxMenuFileNode = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuCopy = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtFileViewer = new _2ndbrainalpha.SyncTextBox();
+            this.txtLineNumbers = new _2ndbrainalpha.SyncTextBox();
+            this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
             this.toolStrip1.SuspendLayout();
             this.statusStripBottom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).BeginInit();
@@ -243,48 +243,10 @@
             this.splitContainerResults.Panel2.AutoScroll = true;
             this.splitContainerResults.Panel2.Controls.Add(this.cbExpandAll);
             this.splitContainerResults.Panel2.Controls.Add(this.tvMatches);
-            this.splitContainerResults.Size = new System.Drawing.Size(937, 774);
+            this.splitContainerResults.Size = new System.Drawing.Size(939, 774);
             this.splitContainerResults.SplitterDistance = 392;
             this.splitContainerResults.SplitterWidth = 2;
             this.splitContainerResults.TabIndex = 5;
-            // 
-            // txtFileViewer
-            // 
-            this.txtFileViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtFileViewer.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtFileViewer.Buddy = this.txtLineNumbers;
-            this.txtFileViewer.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtFileViewer.Location = new System.Drawing.Point(34, 0);
-            this.txtFileViewer.Margin = new System.Windows.Forms.Padding(2);
-            this.txtFileViewer.Name = "txtFileViewer";
-            this.txtFileViewer.ReadOnly = true;
-            this.txtFileViewer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.txtFileViewer.Size = new System.Drawing.Size(901, 372);
-            this.txtFileViewer.TabIndex = 2;
-            this.txtFileViewer.Text = "";
-            this.txtFileViewer.SelectionChanged += new System.EventHandler(this.txtFileViewer_SelectionChanged);
-            this.txtFileViewer.Click += new System.EventHandler(this.txtFileViewer_Click);
-            this.txtFileViewer.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyDown);
-            this.txtFileViewer.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyUp);
-            // 
-            // txtLineNumbers
-            // 
-            this.txtLineNumbers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtLineNumbers.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.txtLineNumbers.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.txtLineNumbers.Buddy = null;
-            this.txtLineNumbers.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtLineNumbers.Location = new System.Drawing.Point(2, 0);
-            this.txtLineNumbers.Margin = new System.Windows.Forms.Padding(2);
-            this.txtLineNumbers.Name = "txtLineNumbers";
-            this.txtLineNumbers.ReadOnly = true;
-            this.txtLineNumbers.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.txtLineNumbers.Size = new System.Drawing.Size(42, 372);
-            this.txtLineNumbers.TabIndex = 4;
-            this.txtLineNumbers.Text = "";
             // 
             // statusStripResults
             // 
@@ -301,7 +263,7 @@
             this.statusStripResults.Location = new System.Drawing.Point(0, 370);
             this.statusStripResults.Name = "statusStripResults";
             this.statusStripResults.Padding = new System.Windows.Forms.Padding(0, 0, 7, 0);
-            this.statusStripResults.Size = new System.Drawing.Size(937, 22);
+            this.statusStripResults.Size = new System.Drawing.Size(939, 22);
             this.statusStripResults.TabIndex = 3;
             this.statusStripResults.Text = "statusStrip2";
             // 
@@ -360,26 +322,6 @@
             this.cbExpandAll.Text = "Expand/collapse all";
             this.cbExpandAll.UseVisualStyleBackColor = true;
             this.cbExpandAll.CheckedChanged += new System.EventHandler(this.cbExpandAll_CheckedChanged);
-            // 
-            // tvMatches
-            // 
-            this.tvMatches.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tvMatches.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
-            this.tvMatches.FullRowSelect = true;
-            this.tvMatches.HideSelection = false;
-            this.tvMatches.LineColor = System.Drawing.Color.DimGray;
-            this.tvMatches.Location = new System.Drawing.Point(0, 23);
-            this.tvMatches.Margin = new System.Windows.Forms.Padding(2);
-            this.tvMatches.Name = "tvMatches";
-            this.tvMatches.Size = new System.Drawing.Size(939, 356);
-            this.tvMatches.TabIndex = 4;
-            this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
-            this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
-            this.tvMatches.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyDown);
-            this.tvMatches.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyUp);
-            this.tvMatches.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tvMatches_MouseDown);
             // 
             // btnSearch
             // 
@@ -534,7 +476,8 @@
             this.lbTargets.Location = new System.Drawing.Point(0, 21);
             this.lbTargets.Margin = new System.Windows.Forms.Padding(2);
             this.lbTargets.Name = "lbTargets";
-            this.lbTargets.Size = new System.Drawing.Size(254, 359);
+            this.lbTargets.Size = new System.Drawing.Size(254, 361);
+            this.lbTargets.Sorted = true;
             this.lbTargets.TabIndex = 0;
             this.lbTargets.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lbTargets_ItemCheck);
             // 
@@ -552,6 +495,64 @@
             this.mnuCopy.Size = new System.Drawing.Size(102, 22);
             this.mnuCopy.Text = "Copy";
             this.mnuCopy.Click += new System.EventHandler(this.mnuCopy_Click);
+            // 
+            // txtFileViewer
+            // 
+            this.txtFileViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFileViewer.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtFileViewer.Buddy = this.txtLineNumbers;
+            this.txtFileViewer.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtFileViewer.Location = new System.Drawing.Point(38, 0);
+            this.txtFileViewer.Margin = new System.Windows.Forms.Padding(2);
+            this.txtFileViewer.Name = "txtFileViewer";
+            this.txtFileViewer.ReadOnly = true;
+            this.txtFileViewer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.txtFileViewer.Size = new System.Drawing.Size(895, 372);
+            this.txtFileViewer.TabIndex = 2;
+            this.txtFileViewer.Text = "";
+            this.txtFileViewer.SelectionChanged += new System.EventHandler(this.txtFileViewer_SelectionChanged);
+            this.txtFileViewer.Click += new System.EventHandler(this.txtFileViewer_Click);
+            this.txtFileViewer.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyDown);
+            this.txtFileViewer.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtFileViewer_KeyUp);
+            // 
+            // txtLineNumbers
+            // 
+            this.txtLineNumbers.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtLineNumbers.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.txtLineNumbers.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.txtLineNumbers.Buddy = null;
+            this.txtLineNumbers.Font = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.txtLineNumbers.Location = new System.Drawing.Point(2, 0);
+            this.txtLineNumbers.Margin = new System.Windows.Forms.Padding(2);
+            this.txtLineNumbers.Name = "txtLineNumbers";
+            this.txtLineNumbers.ReadOnly = true;
+            this.txtLineNumbers.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+            this.txtLineNumbers.Size = new System.Drawing.Size(52, 372);
+            this.txtLineNumbers.TabIndex = 4;
+            this.txtLineNumbers.Text = "";
+            // 
+            // tvMatches
+            // 
+            this.tvMatches.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tvMatches.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
+            this.tvMatches.FullRowSelect = true;
+            this.tvMatches.HideSelection = false;
+            this.tvMatches.LineColor = System.Drawing.Color.DimGray;
+            this.tvMatches.Location = new System.Drawing.Point(0, 23);
+            this.tvMatches.Margin = new System.Windows.Forms.Padding(2);
+            this.tvMatches.Name = "tvMatches";
+            this.tvMatches.Size = new System.Drawing.Size(933, 358);
+            this.tvMatches.TabIndex = 4;
+            this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
+            this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
+            this.tvMatches.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyDown);
+            this.tvMatches.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyUp);
+            this.tvMatches.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tvMatches_MouseDown);
             // 
             // MainForm
             // 

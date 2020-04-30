@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using Match = SearchLib.Match;
+using System.Collections.Concurrent;
 
 namespace _2ndbrainalpha
 {
@@ -26,12 +27,14 @@ namespace _2ndbrainalpha
         delegate void DelegateMethod(params object[] args);
         string _settingsFileName;
         private bool _expandedFirstNode;
-        Dictionary<string, TreeNode> _fileNodes;
+        ConcurrentDictionary<string, TreeNode> _fileNodes;
         private int _lastHighlightLineStartIndex;
         private int _lastHighlightLineEndIndex;
         private int _lastSelectedLineNumber;
-        private Dictionary<string, FileMatchData> _matchResults;
+        private ConcurrentDictionary<string, FileMatchData> _matchResults;
         private bool _suspendFilters;
+        private bool _lastFile;
+        private ILogger _logger;
 
         public IList<string> TargetWords => txtTargets.Text.Split('\n','\r')?.Select(w => w.Trim()).Where(w => w.Length > 0).Distinct().ToList() ?? new List<string>();
 
@@ -43,8 +46,9 @@ namespace _2ndbrainalpha
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _settingsFileName = $@"{path}\settings.txt";
             _expandedFirstNode = false;
-            _fileNodes = new Dictionary<string, TreeNode>();
-            _matchResults=new Dictionary<string, FileMatchData>();
+            _fileNodes = new ConcurrentDictionary<string, TreeNode>();
+            _matchResults=new ConcurrentDictionary<string, FileMatchData>();
+            _logger = new Logger(path);
         }
 
         #region Event handlers
@@ -69,6 +73,7 @@ namespace _2ndbrainalpha
             _lastSelectedLineNumber = 0;
             _matchResults.Clear();
             _suspendFilters = true;
+            _lastFile = false;
 
             // populate list box
             var lastTargets = new Dictionary<string, TargetWord>();
@@ -93,7 +98,7 @@ namespace _2ndbrainalpha
                 targetWord.MatchCount = 0;
             }
 
-            // Spin off thread to do the recon
+            // Spin off thread to do the search
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
             var searchParams = new SearchParams {Path = txtPath.Text, Filter = txtFilter.Text/*, SearchPattern = txtSearch.Text*/, TargetWords = TargetWords};
             tSearch.Start(searchParams);
@@ -263,6 +268,8 @@ namespace _2ndbrainalpha
         private void cbExpandAll_CheckedChanged(object sender, EventArgs e)
         {
             var expandAll = cbExpandAll.Checked;
+            TreeNode topNode = tvMatches.TopNode;
+            tvMatches.SuspendLayout();
             foreach (TreeNode node in tvMatches.Nodes)
             {
                 var file = (string)node.Tag;
@@ -278,6 +285,9 @@ namespace _2ndbrainalpha
                     }
                 }
             }
+
+            tvMatches.TopNode = topNode;
+            tvMatches.ResumeLayout();
         }
 
         private void txtTargets_TextChanged(object sender, EventArgs e)
@@ -307,7 +317,8 @@ namespace _2ndbrainalpha
         {
             txtFileViewer.SuspendLayout();
             txtLineNumbers.SuspendLayout();
-            //tvMatches.SuspendLayout();
+            TreeNode topNode = tvMatches.TopNode;
+            tvMatches.SuspendLayout();
             _suspendFilters = true;
             for (int i=0; i < lbTargets.Items.Count; i++)
             {
@@ -315,9 +326,9 @@ namespace _2ndbrainalpha
             }
             // filter tree view on selected indices
             FilterMatches();
-            tvMatches.Invalidate();
             _suspendFilters = false;
-            //tvMatches.ResumeLayout();
+            tvMatches.TopNode = topNode;
+            tvMatches.ResumeLayout();
             txtFileViewer.ResumeLayout();
             txtLineNumbers.ResumeLayout();
         }
@@ -519,18 +530,6 @@ namespace _2ndbrainalpha
             }
         }
 
-        private void InvokeIfRequiredNoArgs(DelegateMethod method) 
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(method);
-            }
-            else
-            {
-                method();
-            }
-        }
-
         private void SetProgressBarValue(int value)
         {
             InvokeIfRequired(x => { progressBarFiles.Value = (int)x[0]; lblFileCount.Text = x[0].ToString(); }, value);
@@ -574,10 +573,12 @@ namespace _2ndbrainalpha
             }
             catch (ThreadAbortException tex)
             {
+                LogEx(tex);
                 SetStatusTxt($"{tex.Message}");
             }
             catch (Exception ex)
             {
+                LogEx(ex);
                 SetStatusTxt($"{ex.Message}");
             }
         }
@@ -590,18 +591,26 @@ namespace _2ndbrainalpha
 
         private void OnFile(string file)
         {
-            SetProgressBarValue(++_filesProcessed);
             InvokeIfRequired(x =>
             {
                 int filesProcessed = 0;
                 int fileCount = 0;
-                int.TryParse(lblFileCount.Text, out filesProcessed);
+                int.TryParse(x[0].ToString(), out filesProcessed);
+                lblFileCount.Text = filesProcessed.ToString();
+                
+                progressBarFiles.Value = filesProcessed;
+                if (filesProcessed % 5 == 0)
+                {
+                    this.Refresh();
+                }
+
                 int.TryParse(lblMaxFileCount.Text, out fileCount);
                 if (filesProcessed == fileCount)
                 {
                     btnCancel.Visible = false;
+                    _lastFile = true;
                 }
-            }, null);
+            }, Interlocked.Increment(ref _filesProcessed));
             if (_cancelled)
             {
                 InvokeIfRequired(x => {
@@ -619,7 +628,8 @@ namespace _2ndbrainalpha
             if (!_matchResults.ContainsKey((file)))
             {
                 var fileMatchData = new FileMatchData(count);
-                _matchResults.Add(file, fileMatchData);
+                //Log($"_matchResults.Add ({file}, {fileMatchData.ToString()})");
+                _matchResults.TryAdd(file, fileMatchData);
             }
             AddFileToResults(file, count);
         }
@@ -651,8 +661,12 @@ namespace _2ndbrainalpha
             {
                 var fileMatchData = _matchResults[match.File];
                 fileMatchData.Matches.Add(match);
+                if (_lastFile && fileMatchData.MatchCount == fileMatchData.Matches.Count)
+                {
+                    OnComplete();
+                }
             }
-            AddMatchToResults(match, matchCount, true);
+            AddMatchToResults(match, matchCount, false);
         }
 
         private void AddFileToResults(string file, int count)
@@ -672,17 +686,14 @@ namespace _2ndbrainalpha
                         fileNode = tvMatches.Nodes.Add(label);
                     }
 
-                    if (!_fileNodes.ContainsKey(file))
-                    {
-                        _fileNodes.Add(file, fileNode);
-                    }
+                    _fileNodes.TryAdd(file, fileNode);
 
                     fileNode.Name = file;
                     fileNode.Tag = file;
-                    if (tvMatches.SelectedNode == null && tvMatches.Nodes.Count > 0)
+                    if (tvMatches.SelectedNode == null && tvMatches.Nodes.Count > 0 && tvMatches.Nodes[0].Nodes.Count > 0)
                     {
-                        tvMatches.SelectedNode = tvMatches.Nodes[0];
-                        SelectNode(tvMatches.SelectedNode);
+                        tvMatches.SelectedNode = tvMatches.Nodes[0].Nodes[0];
+                        SelectNode(tvMatches.SelectedNode, true);
                     }
                 });
             if (this.InvokeRequired)
@@ -759,12 +770,42 @@ namespace _2ndbrainalpha
             }
         }
 
-        private void OnException(string file, Exception ex) {
+        private void OnException(string file, Exception ex)
+        {
+            LogEx(ex);
             SetStatusTxt($"ProcessFile: file = {file}, msg = {ex.Message}");
         }
 
         private void OnComplete()
         {
+            // Remove targets checked listbox items with zero counts
+            InvokeIfRequired((x) =>
+            {
+                /*_suspendFilters = true;
+                for (int i=lbTargets.Items.Count - 1; i >= 0; i--)
+                {
+                    TargetWord item = lbTargets.Items[i] as TargetWord;
+                    if (item.MatchCount == 0)
+                    {
+                        lbTargets.Items.RemoveAt(i);
+                    }
+                }
+
+                var sItems = new List<TargetWord>();
+                var lbItems = lbTargets.Items.Cast<TargetWord>().OrderByDescending(t => t.MatchCount);
+                foreach (TargetWord word in lbItems)
+                {
+                    sItems.Add(word);
+                }
+                lbTargets.Items.Clear();
+                foreach (TargetWord word in sItems)
+                {
+                    var idx = lbTargets.Items.Add(word);
+                    lbTargets.SetItemChecked(idx, true);
+                }
+
+                _suspendFilters = false;*/
+            }, null);
         }
 
         private void DrawTextWithHighlightedWords(TreeNode node, Graphics g, Rectangle bounds)
@@ -860,6 +901,16 @@ namespace _2ndbrainalpha
             lblColumnNumber.Text = found ? col.ToString() : string.Empty;
             lblPosition.Text = (txtFileViewer.SelectionStart + 1).ToString();
             UpdateLineNumbers();
+        }
+
+        private void Log(string msg)
+        {
+            _logger.Log(msg);
+        }
+        
+        private void LogEx(Exception ex)
+        {
+            _logger.LogException(ex);
         }
 
         #endregion

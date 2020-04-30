@@ -77,6 +77,8 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="FileMatchData.cs" />
+    <Compile Include="ILogger.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
