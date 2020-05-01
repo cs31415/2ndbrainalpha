@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using Match = SearchLib.Match;
+using System.Collections.Concurrent;
 
 namespace _2ndbrainalpha
 {
@@ -21,15 +23,18 @@ namespace _2ndbrainalpha
         bool _cancelled;
         SearchHelper _searchHelper;
         int _filesProcessed;
-        const int LINE_NUMBER_LEN = 5;
         string _currentFile;
         delegate void DelegateMethod(params object[] args);
-        IList<string> _targets;
         string _settingsFileName;
         private bool _expandedFirstNode;
-        Dictionary<string, TreeNode> _fileNodes;
-
-        public int LineNumberOffset => LINE_NUMBER_LEN + 2;
+        ConcurrentDictionary<string, TreeNode> _fileNodes;
+        private int _lastHighlightLineStartIndex;
+        private int _lastHighlightLineEndIndex;
+        private int _lastSelectedLineNumber;
+        private ConcurrentDictionary<string, FileMatchData> _matchResults;
+        private bool _suspendFilters;
+        private bool _lastFile;
+        private ILogger _logger;
 
         public IList<string> TargetWords => txtTargets.Text.Split('\n','\r')?.Select(w => w.Trim()).Where(w => w.Length > 0).Distinct().ToList() ?? new List<string>();
 
@@ -41,17 +46,21 @@ namespace _2ndbrainalpha
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _settingsFileName = $@"{path}\settings.txt";
             _expandedFirstNode = false;
-            _fileNodes = new Dictionary<string, TreeNode>();
+            _fileNodes = new ConcurrentDictionary<string, TreeNode>();
+            _matchResults=new ConcurrentDictionary<string, FileMatchData>();
+            _logger = new Logger(path);
         }
 
         #region Event handlers
         private void btnSearch_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtSearch.Text) && string.IsNullOrWhiteSpace(txtTargets.Text)) 
+            if (/*string.IsNullOrWhiteSpace(txtSearch.Text) && */string.IsNullOrWhiteSpace(txtTargets.Text)) 
             {
-                MessageBox.Show("Enter a search term");
+                MessageBox.Show("Enter a search term(s)");
                 return;
             }
+
+            btnCancel.Visible = true;
 
             _currentFile = null;
             _filesProcessed = 0;
@@ -60,11 +69,41 @@ namespace _2ndbrainalpha
             txtFileViewer.Text = "";
             _expandedFirstNode = false;
             _fileNodes.Clear();
+            _lastHighlightLineStartIndex = _lastHighlightLineEndIndex = 0;
+            _lastSelectedLineNumber = 0;
+            _matchResults.Clear();
+            _suspendFilters = true;
+            _lastFile = false;
 
-            // Spin off thread to do the recon
+            // populate list box
+            var lastTargets = new Dictionary<string, TargetWord>();
+            foreach (TargetWord targetWord in lbTargets.Items)
+            {
+                lastTargets.Add(targetWord.Word, targetWord);
+            }
+
+            lbTargets.Items.Clear();
+            foreach (var targetWord in TargetWords)
+            {
+                if (!lbTargets.Items.Cast<TargetWord>().Any(t => t.Word.ToLower() == targetWord.ToLower()))
+                {
+                    var matchCount = lastTargets.ContainsKey(targetWord) ? lastTargets[targetWord].MatchCount : 0;
+                    var idx = lbTargets.Items.Add(new TargetWord(targetWord, matchCount));
+                    lbTargets.SetItemChecked(idx, true);
+                }
+            }
+
+            foreach (TargetWord targetWord in lbTargets.Items)
+            {
+                targetWord.MatchCount = 0;
+            }
+
+            // Spin off thread to do the search
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
-            var searchParams = new SearchParams {Path = txtPath.Text, Filter = txtFilter.Text, SearchPattern = txtSearch.Text, TargetWords = TargetWords};
+            var searchParams = new SearchParams {Path = txtPath.Text, Filter = txtFilter.Text/*, SearchPattern = txtSearch.Text*/, TargetWords = TargetWords};
             tSearch.Start(searchParams);
+
+            tvMatches.Focus();
         }
 
         private void btnSelectPath_Click(object sender, EventArgs e)
@@ -108,18 +147,19 @@ namespace _2ndbrainalpha
                     TargetWords
                     .ToArray();
 
-                DrawTextWithHighlightedWords(e.Node.Text,
-                                             wordsToHighlight.ToArray<string>(),
+                var node = e.Node;
+                var match = node.Tag as Match;
+
+                DrawTextWithHighlightedWords(node,
                                              e.Graphics,
-                                             e.Bounds,
-                                             (e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected);
+                                             e.Bounds);
             }
         }
 
         private void tvMatches_NodeMouseClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             var node = e.Node;
-            SelectNode(node);
+            SelectNode(node, true);
         }
 
         private void txtFileViewer_Click(object sender, EventArgs e)
@@ -139,25 +179,25 @@ namespace _2ndbrainalpha
 
         private void btnAddSynonyms_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtSearch.Text))
+            if (string.IsNullOrWhiteSpace(txtSynonynFor.Text))
             {
-                MessageBox.Show("Enter a search term");
+                MessageBox.Show("Enter a word");
                 return;
             }
 
-            var searchPattern = txtSearch.Text;
+            var searchPattern = txtSynonynFor.Text;
+            if (!TargetWords.Any(t => t.Equals(searchPattern, StringComparison.OrdinalIgnoreCase)))
+            {
+                AppendTextBoxText(txtTargets, searchPattern);
+            }
+
             var targetWords = TargetWords;
-            //if (!targetWords.Contains(searchPattern))
-            //{
-            //    targetWords.Add(searchPattern);
-            //    AppendTextBoxText(txtTargets, searchPattern);
-            //}
 
             // Look up synonym of search word
             var synonyms = Lookup.GetSynonyms(searchPattern).Select(s => s.Word).Distinct().ToList();
             foreach (var synonym in synonyms)
             {
-                if (!targetWords.Contains(synonym))
+                if (!targetWords.Any(t => t.Equals(synonym, StringComparison.OrdinalIgnoreCase)))
                 {
                     AppendTextBoxText(txtTargets, synonym);
                 }
@@ -179,13 +219,6 @@ namespace _2ndbrainalpha
             SaveSettings();
         }
 
-        private void txtTargets_TextChanged(object sender, EventArgs e)
-        {
-            var count = TargetWords.Count;
-            var suffix = count > 0 ? "s" : "";
-            lblTargetCount.Text = $"{count} item{suffix}";
-        }
-
         private void mnuCopy_Click(object sender, EventArgs e)
         {
             CopySelectedNodeToClipboard(tvMatches);
@@ -197,6 +230,18 @@ namespace _2ndbrainalpha
             {
                 CopySelectedNodeToClipboard(tvMatches);
                 e.SuppressKeyPress = true;
+            }
+            else
+            {
+                //SelectNode(tvMatches.SelectedNode, true);
+            }
+        }
+
+        private void tvMatches_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData != (Keys.Control | Keys.C))
+            {
+                SelectNode(tvMatches.SelectedNode, true);
             }
         }
 
@@ -215,23 +260,77 @@ namespace _2ndbrainalpha
             ctxMenuFileNode.Show(tvMatches, new Point(e.X, e.Y));
         }
 
-        private void btnExpandCollapse_Click(object sender, EventArgs e)
+        private void txtFileViewer_SelectionChanged(object sender, EventArgs e)
         {
+            lblSelection.Text = txtFileViewer.SelectedText.Length.ToString();
+        }
+
+        private void cbExpandAll_CheckedChanged(object sender, EventArgs e)
+        {
+            var expandAll = cbExpandAll.Checked;
+            TreeNode topNode = tvMatches.TopNode;
+            tvMatches.SuspendLayout();
             foreach (TreeNode node in tvMatches.Nodes)
             {
                 var file = (string)node.Tag;
                 if (_fileNodes.ContainsKey(file))
                 {
-                    if (node.IsExpanded)
-                    {
-                        node.Collapse();
-                    }
-                    else
+                    if (expandAll)
                     {
                         node.ExpandAll();
                     }
+                    else
+                    {
+                        node.Collapse();
+                    }
                 }
             }
+
+            tvMatches.TopNode = topNode;
+            tvMatches.ResumeLayout();
+        }
+
+        private void txtTargets_TextChanged(object sender, EventArgs e)
+        {
+            var count = TargetWords.Count;
+            lblTargetCount.Text = $"{count} item(s)";
+        }
+
+        private void lbTargets_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            this.BeginInvoke((MethodInvoker)delegate {
+                if (lbTargets.Items.Count == TargetWords.Count)
+                {
+                    _suspendFilters = false;
+                }
+
+                if (!_suspendFilters && ((TargetWord)lbTargets.Items[e.Index]).MatchCount > 0)
+                {
+                    // filter tree view on selected indices
+                    FilterMatches();
+                    tvMatches.Invalidate();
+                }
+            });
+        }
+
+        private void cbTargetsToggle_CheckedChanged(object sender, EventArgs e)
+        {
+            txtFileViewer.SuspendLayout();
+            txtLineNumbers.SuspendLayout();
+            TreeNode topNode = tvMatches.TopNode;
+            tvMatches.SuspendLayout();
+            _suspendFilters = true;
+            for (int i=0; i < lbTargets.Items.Count; i++)
+            {
+                lbTargets.SetItemChecked(i, cbTargetsToggle.Checked);
+            }
+            // filter tree view on selected indices
+            FilterMatches();
+            _suspendFilters = false;
+            tvMatches.TopNode = topNode;
+            tvMatches.ResumeLayout();
+            txtFileViewer.ResumeLayout();
+            txtLineNumbers.ResumeLayout();
         }
         #endregion
 
@@ -244,17 +343,27 @@ namespace _2ndbrainalpha
             }
         }
 
-        private void SelectNode(TreeNode node)
+        private void SelectNode(TreeNode node, bool scrollToCaret = false)
         {
+            if (node == null)
+                return;
+
             var match = node.Tag as SearchLib.Match;
             string file;
 
             if (match == null)
             {
+                // file node
                 file = node.Tag as string;
+                UnhighlightPreviousSelectedLine(node);
+                foreach (TreeNode childNode in node.Nodes)
+                {
+                    SelectNode(childNode, scrollToCaret);
+                }
             }
             else
             {
+                // match node
                 file = match.File;
             }
 
@@ -263,43 +372,35 @@ namespace _2ndbrainalpha
                 return;
             }
 
-            int position = 0;
             // Load file if not already loaded
             if (file != _currentFile)
             {
                 _currentFile = file;
-                var lines = File.ReadAllLines(file);
-                var sb = new StringBuilder();
-
-                for (int n = 0; n < lines.Length; n++)
-                {
-                    var line = lines[n];
-                    sb.Append($"{line}{Environment.NewLine}");
-                    if (match != null && n < match.LineNumber)
-                    {
-                        position += line.Length + 1;
-                    }
-                }
-
-                txtFileViewer.Text = sb.ToString();
-            }
-            else
-            {
-                var lines = txtFileViewer.Text.Split(Environment.NewLine.ToCharArray());
-                for (int n = 0; n < lines.Length; n++)
-                {
-                    var line = lines[n];
-                    if (match != null && n < match.LineNumber)
-                    {
-                        position += line.Length + 1 /* for newline */;
-                    }
-                }
+                txtFileViewer.Text = File.ReadAllText(file);
             }
 
             if (match != null)
             {
-                position += match.StartIndex;
-                txtFileViewer.Select(position, match.Word.Length);
+                if (scrollToCaret)
+                {
+                    // unhighlight previously highlighted line, if any
+                    UnhighlightPreviousSelectedLine(node.Parent);
+
+                    // highlight line
+                    HighlightSelection(match.LineStartIndex, match.LineEndIndex, Color.LightGoldenrodYellow);
+                    _lastHighlightLineStartIndex = match.LineStartIndex;
+                    _lastHighlightLineEndIndex = match.LineEndIndex;
+                    _lastSelectedLineNumber = match.LineNumber;
+
+                    // Scroll view if selection is out of visible range
+                    if (match.Position > txtFileViewer.BottomVisibleCharIndex || match.Position < txtFileViewer.TopVisibleCharIndex)
+                    {
+                        txtFileViewer.ScrollToCaret();
+                    }
+                }
+
+                txtFileViewer.Select(match.Position, match.Word.Length);
+                txtFileViewer.SelectionBackColor = Color.Orange;
             }
             else
             {
@@ -307,8 +408,31 @@ namespace _2ndbrainalpha
             }
 
             SetLineAndColumn();
-            txtFileViewer.SelectionBackColor = Color.Orange;
-            txtFileViewer.ScrollToCaret();
+        }
+
+        private void UnhighlightPreviousSelectedLine(TreeNode fileNode)
+        {
+            if (_lastHighlightLineStartIndex >= 0 && _lastHighlightLineEndIndex > 0)
+            {
+                HighlightSelection(_lastHighlightLineStartIndex, _lastHighlightLineEndIndex, txtFileViewer.BackColor);
+
+                // restore matched word highlights
+                foreach (TreeNode childNode in fileNode.Nodes)
+                {
+                    var m = childNode.Tag as Match;
+                    if (m.LineNumber == _lastSelectedLineNumber)
+                    {
+                        SelectNode(childNode);
+                    }
+                }
+            }
+        }
+
+        private void HighlightSelection(int startIndex, int endIndex, Color color)
+        {
+            Debug.WriteLine($"start index = {startIndex}, length = {endIndex - startIndex}");
+            txtFileViewer.Select(startIndex, endIndex - startIndex);
+            txtFileViewer.SelectionBackColor = color;
         }
 
         private void UpdateLineNumbers()
@@ -347,7 +471,7 @@ namespace _2ndbrainalpha
                 if (settings != null) {
                     txtPath.Text = settings.Path;
                     txtFilter.Text = settings.Filter;
-                    txtSearch.Text = settings.SearchText;
+                    //txtSearch.Text = settings.SearchText;
                     if (settings.TargetWords != null) {
                         foreach (var word in settings.TargetWords) {
                             AppendTextBoxText(txtTargets, word);
@@ -362,7 +486,7 @@ namespace _2ndbrainalpha
             var settings = new Settings();
             settings.Path = txtPath.Text;
             settings.Filter = txtFilter.Text;
-            settings.SearchText = txtSearch.Text;
+            //settings.SearchText = txtSearch.Text;
             settings.TargetWords = 
                 txtTargets
                     .Text
@@ -406,18 +530,6 @@ namespace _2ndbrainalpha
             }
         }
 
-        private void InvokeIfRequiredNoArgs(DelegateMethod method) 
-        {
-            if (this.InvokeRequired)
-            {
-                this.Invoke(method);
-            }
-            else
-            {
-                method();
-            }
-        }
-
         private void SetProgressBarValue(int value)
         {
             InvokeIfRequired(x => { progressBarFiles.Value = (int)x[0]; lblFileCount.Text = x[0].ToString(); }, value);
@@ -426,37 +538,6 @@ namespace _2ndbrainalpha
         private void SetProgressBarMaximum(int max)
         {
             InvokeIfRequired(x => { progressBarFiles.Maximum = (int)x[0]; lblMaxFileCount.Text = x[0].ToString(); }, max);
-        }
-
-        private void AddFileToResults(string file, int count)
-        {
-            var fAddFileToResults = 
-                new Action<string,int> ((f,c) =>
-                {
-                    var label = $"{f} ({c} items)";
-                    var fileNode = tvMatches.Nodes.Add(label);
-
-                    if (!_fileNodes.ContainsKey(file))
-                    {
-                        _fileNodes.Add(file, fileNode);
-                    }
-
-                    fileNode.Name = file;
-                    fileNode.Tag = file;
-                    if (tvMatches.SelectedNode == null && tvMatches.Nodes.Count > 0)
-                    {
-                        tvMatches.SelectedNode = tvMatches.Nodes[0];
-                        SelectNode(tvMatches.SelectedNode);
-                    }
-                });
-            if (this.InvokeRequired)
-            {
-                this.Invoke(fAddFileToResults, file, count);
-            }
-            else
-            {
-                fAddFileToResults(file, count);
-            }
         }
 
         private void SearchThread(object arg)
@@ -472,12 +553,12 @@ namespace _2ndbrainalpha
                 }
 
                 var targetWords = searchParams.TargetWords;
-                var searchPattern = searchParams.SearchPattern;
+                /*var searchPattern = searchParams.SearchPattern;
                 if (!string.IsNullOrWhiteSpace(searchPattern) && !targetWords.Contains(searchPattern)) 
                 {
                     targetWords.Add(searchPattern);
                     AppendTextBoxText(txtTargets, searchPattern);
-                }
+                }*/
 
                 var path = $"{searchParams.Path}";
                 if (!string.IsNullOrEmpty(path))
@@ -492,10 +573,12 @@ namespace _2ndbrainalpha
             }
             catch (ThreadAbortException tex)
             {
+                LogEx(tex);
                 SetStatusTxt($"{tex.Message}");
             }
             catch (Exception ex)
             {
+                LogEx(ex);
                 SetStatusTxt($"{ex.Message}");
             }
         }
@@ -508,9 +591,31 @@ namespace _2ndbrainalpha
 
         private void OnFile(string file)
         {
-            SetProgressBarValue(++_filesProcessed);
+            InvokeIfRequired(x =>
+            {
+                int filesProcessed = 0;
+                int fileCount = 0;
+                int.TryParse(x[0].ToString(), out filesProcessed);
+                lblFileCount.Text = filesProcessed.ToString();
+                
+                progressBarFiles.Value = filesProcessed;
+                if (filesProcessed % 5 == 0)
+                {
+                    this.Refresh();
+                }
+
+                int.TryParse(lblMaxFileCount.Text, out fileCount);
+                if (filesProcessed == fileCount)
+                {
+                    btnCancel.Visible = false;
+                    _lastFile = true;
+                }
+            }, Interlocked.Increment(ref _filesProcessed));
             if (_cancelled)
             {
+                InvokeIfRequired(x => {
+                    btnCancel.Visible = false;
+                },  null);
                 SetStatusTxt("Search was canceled.");
                 return;
             }
@@ -518,23 +623,113 @@ namespace _2ndbrainalpha
 
         private void OnFileMatch(string file, int count)
         {
+            _lastHighlightLineStartIndex = _lastHighlightLineEndIndex = 0;
+            _lastSelectedLineNumber = 0;
+            if (!_matchResults.ContainsKey((file)))
+            {
+                var fileMatchData = new FileMatchData(count);
+                //Log($"_matchResults.Add ({file}, {fileMatchData.ToString()})");
+                _matchResults.TryAdd(file, fileMatchData);
+            }
             AddFileToResults(file, count);
         }
 
         private void OnMatch(SearchLib.Match match, int matchCount)
         {
-            var onMatch = new Action<SearchLib.Match>(x =>
+            var fUpdateWordCount = new Action<Match>((m) =>
             {
-                var node = new TreeNode($"{x.Line} : ({1 + x.LineNumber},{1 + x.StartIndex})");
-                node.Tag = match;
-                var fileNode = tvMatches.Nodes.Find(match.File, false)[0];
-                fileNode.Nodes.Add(node);
-                if (fileNode.Nodes.Count == matchCount && !_expandedFirstNode)
+                for (int i = 0; i < lbTargets.Items.Count; i++)
                 {
-                    _expandedFirstNode = true;
-                    fileNode.Expand();
+                    var targetWord = lbTargets.Items[i] as TargetWord;
+                    if (targetWord.Word.ToLower() == m.Word.ToLower())
+                    {
+                        targetWord.MatchCount++;
+                        lbTargets.Items[i] = lbTargets.Items[i];
+                    }
                 }
             });
+            if (this.InvokeRequired)
+            {
+                this.Invoke(fUpdateWordCount, match);
+            }
+            else
+            {
+                fUpdateWordCount(match);
+            }
+
+            if (_matchResults.ContainsKey(match.File))
+            {
+                var fileMatchData = _matchResults[match.File];
+                fileMatchData.Matches.Add(match);
+                if (_lastFile && fileMatchData.MatchCount == fileMatchData.Matches.Count)
+                {
+                    OnComplete();
+                }
+            }
+            AddMatchToResults(match, matchCount, false);
+        }
+
+        private void AddFileToResults(string file, int count)
+        {
+            var fAddFileToResults =
+                new Action<string, int>((f, c) =>
+                {
+                    var label = $"{f} ({c} items)";
+                    var nodes = tvMatches.Nodes.Find(f, false);
+                    TreeNode fileNode;
+                    if (nodes.Length > 0)
+                    {
+                        fileNode = nodes[0];
+                    }
+                    else
+                    {
+                        fileNode = tvMatches.Nodes.Add(label);
+                    }
+
+                    _fileNodes.TryAdd(file, fileNode);
+
+                    fileNode.Name = file;
+                    fileNode.Tag = file;
+                    if (tvMatches.SelectedNode == null && tvMatches.Nodes.Count > 0 && tvMatches.Nodes[0].Nodes.Count > 0)
+                    {
+                        tvMatches.SelectedNode = tvMatches.Nodes[0].Nodes[0];
+                        SelectNode(tvMatches.SelectedNode, true);
+                    }
+                });
+            if (this.InvokeRequired)
+            {
+                this.Invoke(fAddFileToResults, file, count);
+            }
+            else
+            {
+                fAddFileToResults(file, count);
+            }
+        }
+
+        private void AddMatchToResults(Match match, int matchCount, bool selectNode=false)
+        {
+            var onMatch = new Action<SearchLib.Match>(x =>
+            {
+                var node = new TreeNode($"({1 + x.LineNumber},{1 + x.StartIndex}): {x.Line}");
+                node.Tag = match;
+                var nodes = tvMatches.Nodes.Find(match.File, false);
+                if (nodes.Length > 0)
+                {
+                    var fileNode = nodes[0];
+                    fileNode.Nodes.Add(node);
+                    if (fileNode.Nodes.Count == matchCount && !_expandedFirstNode)
+                    {
+                        _expandedFirstNode = true;
+                        fileNode.Expand();
+                    }
+
+                    if (selectNode)
+                    {
+                        SelectNode(node);
+                    }
+                }
+            });
+
             if (this.InvokeRequired)
             {
                 this.Invoke(onMatch, match);
@@ -545,16 +740,82 @@ namespace _2ndbrainalpha
             }
         }
 
-        private void OnException(string file, Exception ex) {
+        private void FilterMatches()
+        {
+            tvMatches.Nodes.Clear();
+            foreach (TargetWord item in lbTargets.CheckedItems)
+            {
+                var word = item.Word;
+                foreach (var file in _matchResults.Keys)
+                {
+                    var fileMatchData = _matchResults[file];
+                    var matchCount = fileMatchData.MatchCount;
+                    bool addedFile = false;
+                    var filteredMatches = fileMatchData
+                        .Matches
+                        .Where(match => match.Word.ToLower() == word.ToLower())
+                        .ToList();
+                    var filteredMatchCount = filteredMatches.Count;
+
+                    foreach (var match in filteredMatches)
+                    {
+                        if (!addedFile)
+                        {
+                            AddFileToResults(file, filteredMatchCount);
+                            addedFile = true;
+                        }
+                        AddMatchToResults(match, filteredMatchCount, false);
+                    }
+                }
+            }
+        }
+
+        private void OnException(string file, Exception ex)
+        {
+            LogEx(ex);
             SetStatusTxt($"ProcessFile: file = {file}, msg = {ex.Message}");
         }
 
         private void OnComplete()
         {
+            // Remove targets checked listbox items with zero counts
+            InvokeIfRequired((x) =>
+            {
+                /*_suspendFilters = true;
+                for (int i=lbTargets.Items.Count - 1; i >= 0; i--)
+                {
+                    TargetWord item = lbTargets.Items[i] as TargetWord;
+                    if (item.MatchCount == 0)
+                    {
+                        lbTargets.Items.RemoveAt(i);
+                    }
+                }
+
+                var sItems = new List<TargetWord>();
+                var lbItems = lbTargets.Items.Cast<TargetWord>().OrderByDescending(t => t.MatchCount);
+                foreach (TargetWord word in lbItems)
+                {
+                    sItems.Add(word);
+                }
+                lbTargets.Items.Clear();
+                foreach (TargetWord word in sItems)
+                {
+                    var idx = lbTargets.Items.Add(word);
+                    lbTargets.SetItemChecked(idx, true);
+                }
+
+                _suspendFilters = false;*/
+            }, null);
         }
 
-        private void DrawTextWithHighlightedWords(string text, string[] wordsToHighlight, Graphics g, Rectangle bounds, bool selected)
+        private void DrawTextWithHighlightedWords(TreeNode node, Graphics g, Rectangle bounds)
         {
+            string text = node.Text;
+            var match = node.Tag as Match;
+            string wordToHighlight = match.Word;
+            int startPosition = match?.StartIndex ?? 0;
+            int offset = ($"({match.LineNumber+1},{match.StartIndex+1}): ").Length;
+
             var textSize = GetTextSize(g, text);
 
             //Default location is the node bounds location.
@@ -565,24 +826,29 @@ namespace _2ndbrainalpha
 
             //Split text into substrings to highlight and not highlight.
             var words = Regex.Split(text, @"([,\s;\.\t\{\}\[\]()])").Where(w => w.Length > 0).ToArray();
-            var wordsWithHighlightStatus = Array.ConvertAll(words,
-                                                            (s) => Tuple.Create(s, wordsToHighlight.Contains(s)));
+            var wordsWithHighlightStatus = 
+                Array.ConvertAll(
+                    words,
+                    (s) => Tuple.Create(s, wordToHighlight.ToLower() == s.ToLower()));
 
+            var currentPos = 0;
             for (int i = 0; i < wordsWithHighlightStatus.Length; i++)
             {
                 var wordWithHighlightStatus = wordsWithHighlightStatus[i];
                 var word = wordWithHighlightStatus.Item1;
-                var highlight = wordWithHighlightStatus.Item2;
+                
                 var size = Size;
 
                 //Draw the current word.
                 size = GetTextSize(g, word);
+                var highlight = wordWithHighlightStatus.Item2 && (currentPos - offset) == startPosition ;
                 DrawText(g,
                      word,
                      location,
                      Color.Black,
                      highlight ? Color.Orange : Color.Transparent);
                 location.Offset(size.Width, 0);
+                currentPos += word.Length;
             }
         }
 
@@ -633,8 +899,18 @@ namespace _2ndbrainalpha
             }
             lblLineNumber.Text = found ? (lineNum + 1).ToString() : string.Empty;
             lblColumnNumber.Text = found ? col.ToString() : string.Empty;
-
+            lblPosition.Text = (txtFileViewer.SelectionStart + 1).ToString();
             UpdateLineNumbers();
+        }
+
+        private void Log(string msg)
+        {
+            _logger.Log(msg);
+        }
+        
+        private void LogEx(Exception ex)
+        {
+            _logger.LogException(ex);
         }
 
         #endregion

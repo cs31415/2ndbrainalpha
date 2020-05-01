@@ -39,12 +39,17 @@ namespace SearchLib
 
         public void SearchFiles(string[] files, IList<string> words)
         {
-            var trie = new AhoCorasick(words);
+            var trie = new AhoCorasick(CharComparer.OrdinalIgnoreCase, words);
             if (files != null && files.Length > 0)
             {
                 var tasks = new List<Task>();
                 foreach (var file in files)
                 {
+                    if (_checkForCancellation())
+                    {
+                        return;
+                    }
+
                     OnFile(file);
                     Action search = async () => await SearchFile(file, trie);
                     tasks.Add(Task.Run(search));
@@ -69,10 +74,13 @@ namespace SearchLib
                 using (var reader = new StreamReader(fs))
                 {
                     var text = await reader.ReadToEndAsync();
-                    var lines = text.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
+                    // TODO: StringSplitOptions.RemoveEmptyEntries is creating a problem with incorrect line numbers for matches!
+                    var lines = text.Split(new[] {"\r\n", "\n", "\r"}, StringSplitOptions.None);
                     var currentLineNumber = 0;
                     var nMatches = 0;
                     var matches = new List<Match>();
+                    int position = 0;
+                    int endOfLinePosition = 0;
                     foreach (var line in lines)
                     {
                         if (_checkForCancellation())
@@ -80,21 +88,25 @@ namespace SearchLib
                             return;
                         }
 
+                        var carriageReturn = line.Length > 0 && line.ToCharArray()[line.Length - 1] == '\r';
+                        endOfLinePosition = position + line.Length + (carriageReturn ? 0 : 1);
+
                         matches.AddRange(                            
                             trie
                                 .Search(line)
                                 .Where(m =>
                                 {
                                     var chars = line.ToCharArray();
-                                    var leftSpace = IsWhiteSpace(chars[Math.Max(m.Index - 1, 0)]);
+                                    var leftSpace = m.Index == 0 || IsWhiteSpace(chars[Math.Max(m.Index - 1, 0)]);
                                     var rightSpace =
                                         IsWhiteSpace(chars[Math.Min(m.Index + m.Word.Length, line.Length - 1)]);
                                     return leftSpace && rightSpace;
                                 })
                                 .ToList()
-                                .Select(m => new Match(file, line, m.Word, currentLineNumber, m.Index))
+                                .Select(m => new Match(file, line, m.Word, currentLineNumber, m.Index, position + m.Index, position, endOfLinePosition))
                             );
 
+                        position = endOfLinePosition;
                         currentLineNumber++;
                     }
                     if (matches.Any())
@@ -117,7 +129,7 @@ namespace SearchLib
 
         private bool IsWhiteSpace(char c)
         {
-            return string.IsNullOrWhiteSpace(c.ToString()) || Regex.IsMatch(c.ToString(), "[.,;\"{}]");
+            return string.IsNullOrWhiteSpace(c.ToString()) || Regex.IsMatch(c.ToString(), "[.,;\"'{}()-:]");
         }
     }
 }
