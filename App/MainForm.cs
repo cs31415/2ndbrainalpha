@@ -1,5 +1,4 @@
-﻿using SynonymsLib;
-using System;
+﻿using System;
 using System.IO;
 using System.Windows.Forms;
 using System.Linq;
@@ -8,13 +7,13 @@ using System.Drawing;
 using SearchLib;
 using System.Text.RegularExpressions;
 using System.Text;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Diagnostics;
 using Newtonsoft.Json;
 using Match = SearchLib.Match;
 using System.Collections.Concurrent;
+using ThesaurusLib;
 
 namespace _2ndbrainalpha
 {
@@ -35,6 +34,7 @@ namespace _2ndbrainalpha
         private bool _suspendFilters;
         private bool _lastFile;
         private ILogger _logger;
+        private IAntonymLookup _antonymLookup;
 
         public IList<string> TargetWords => txtTargets.Text.Split('\n','\r')?.Select(w => w.Trim()).Where(w => w.Length > 0).Distinct().ToList() ?? new List<string>();
 
@@ -45,6 +45,7 @@ namespace _2ndbrainalpha
             _searchHelper = new SearchHelper(CheckForCancellation, OnFile, OnFileMatch, OnMatch, OnException, OnComplete);
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _settingsFileName = $@"{path}\settings.txt";
+            _antonymLookup = new AntonymLookup(path);
             _expandedFirstNode = false;
             _fileNodes = new ConcurrentDictionary<string, TreeNode>();
             _matchResults=new ConcurrentDictionary<string, FileMatchData>();
@@ -179,13 +180,13 @@ namespace _2ndbrainalpha
 
         private void btnAddSynonyms_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(txtSynonynFor.Text))
+            if (string.IsNullOrWhiteSpace(txtThesaurusLookup.Text))
             {
                 MessageBox.Show("Enter a word");
                 return;
             }
 
-            var searchPattern = txtSynonynFor.Text;
+            var searchPattern = txtThesaurusLookup.Text;
             if (!TargetWords.Any(t => t.Equals(searchPattern, StringComparison.OrdinalIgnoreCase)))
             {
                 AppendTextBoxText(txtTargets, searchPattern);
@@ -194,7 +195,7 @@ namespace _2ndbrainalpha
             var targetWords = TargetWords;
 
             // Look up synonym of search word
-            var synonyms = Lookup.GetSynonyms(searchPattern).Select(s => s.Word).Distinct().ToList();
+            var synonyms = ThesaurusLib.Lookup.GetSynonyms(searchPattern).Select(s => s.Word).Distinct().ToList();
             foreach (var synonym in synonyms)
             {
                 if (!targetWords.Any(t => t.Equals(synonym, StringComparison.OrdinalIgnoreCase)))
@@ -202,6 +203,29 @@ namespace _2ndbrainalpha
                     AppendTextBoxText(txtTargets, synonym);
                 }
             }
+        }
+
+        private void btnAddAntonyms_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtThesaurusLookup.Text))
+            {
+                MessageBox.Show("Enter a word");
+                return;
+            }
+
+            var searchPattern = txtThesaurusLookup.Text;
+            var targetWords = TargetWords;
+
+            // Look up antonym of search word
+            var antonyms = _antonymLookup.GetAntonyms(searchPattern).Distinct().ToList();
+            foreach (var antonym in antonyms)
+            {
+                if (!targetWords.Any(t => t.Equals(antonym, StringComparison.OrdinalIgnoreCase)))
+                {
+                    AppendTextBoxText(txtTargets, antonym);
+                }
+            }
+
         }
 
         private void MainForm_Resize(object sender, EventArgs e)

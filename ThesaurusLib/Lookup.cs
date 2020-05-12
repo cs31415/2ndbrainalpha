@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace SynonymsLib
+namespace ThesaurusLib
 {
     /// <summary>
     /// Helper class for looking up entries in the thesaurus

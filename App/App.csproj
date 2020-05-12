@@ -128,9 +128,9 @@
       <Project>{873b0aa5-9771-4389-a9bc-12e8aaffbfaa}</Project>
       <Name>SearchLib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SynonymsLib\SynonymsLib.csproj">
+    <ProjectReference Include="..\ThesaurusLib\ThesaurusLib.csproj">
       <Project>{c3f1576e-59d3-4320-a68f-c866d37c01c1}</Project>
-      <Name>SynonymsLib</Name>
+      <Name>ThesaurusLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

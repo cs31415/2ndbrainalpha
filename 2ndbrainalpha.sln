@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App", "App\App.csproj", "{F5953FED-0DBE-4307-8996-AF0EB7ACAFAB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SynonymsLib", "SynonymsLib\SynonymsLib.csproj", "{C3F1576E-59D3-4320-A68F-C866D37C01C1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThesaurusLib", "ThesaurusLib\ThesaurusLib.csproj", "{C3F1576E-59D3-4320-A68F-C866D37C01C1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SearchLib", "SearchLib\SearchLib.csproj", "{873B0AA5-9771-4389-A9BC-12E8AAFFBFAA}"
 EndProject

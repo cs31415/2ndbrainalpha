@@ -1,4 +1,4 @@
-﻿namespace SynonymsLib
+﻿namespace ThesaurusLib
 {
     /// <summary>
     /// Represents a synonym entry in the thesaurus
