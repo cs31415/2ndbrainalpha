@@ -217,7 +217,12 @@ namespace _2ndbrainalpha
             var targetWords = TargetWords;
 
             // Look up antonym of search word
-            var antonyms = _antonymLookup.GetAntonyms(searchPattern).Distinct().ToList();
+            var antonyms = _antonymLookup.GetAntonyms(searchPattern)?.Distinct()?.ToList();
+            if (antonyms == null)
+            {
+                MessageBox.Show("No antonyms found");
+                return;
+            }
             foreach (var antonym in antonyms)
             {
                 if (!targetWords.Any(t => t.Equals(antonym, StringComparison.OrdinalIgnoreCase)))
@@ -423,8 +428,7 @@ namespace _2ndbrainalpha
                     }
                 }
 
-                txtFileViewer.Select(match.Position, match.Word.Length);
-                txtFileViewer.SelectionBackColor = Color.Orange;
+                HighlightSelection(match.Position, match.Position + match.Word.Length, Color.Orange);
             }
             else
             {
@@ -454,7 +458,7 @@ namespace _2ndbrainalpha
 
         private void HighlightSelection(int startIndex, int endIndex, Color color)
         {
-            Debug.WriteLine($"start index = {startIndex}, length = {endIndex - startIndex}");
+            //Debug.WriteLine($"start index = {startIndex}, length = {endIndex - startIndex}");
             txtFileViewer.Select(startIndex, endIndex - startIndex);
             txtFileViewer.SelectionBackColor = color;
         }

@@ -69,13 +69,13 @@
             this.txtTargets = new System.Windows.Forms.TextBox();
             this.splitContainerMaster = new System.Windows.Forms.SplitContainer();
             this.splitContainerSideBar = new System.Windows.Forms.SplitContainer();
+            this.btnAddAntonyms = new System.Windows.Forms.Button();
             this.lblTargetCount = new System.Windows.Forms.Label();
             this.txtThesaurusLookup = new System.Windows.Forms.TextBox();
             this.cbTargetsToggle = new System.Windows.Forms.CheckBox();
             this.lbTargets = new System.Windows.Forms.CheckedListBox();
             this.ctxMenuFileNode = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuCopy = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnAddAntonyms = new System.Windows.Forms.Button();
             this.toolStrip1.SuspendLayout();
             this.statusStripBottom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).BeginInit();
@@ -244,7 +244,7 @@
             this.splitContainerResults.Panel2.AutoScroll = true;
             this.splitContainerResults.Panel2.Controls.Add(this.cbExpandAll);
             this.splitContainerResults.Panel2.Controls.Add(this.tvMatches);
-            this.splitContainerResults.Size = new System.Drawing.Size(941, 774);
+            this.splitContainerResults.Size = new System.Drawing.Size(943, 774);
             this.splitContainerResults.SplitterDistance = 392;
             this.splitContainerResults.SplitterWidth = 2;
             this.splitContainerResults.TabIndex = 5;
@@ -262,7 +262,7 @@
             this.txtFileViewer.Name = "txtFileViewer";
             this.txtFileViewer.ReadOnly = true;
             this.txtFileViewer.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-            this.txtFileViewer.Size = new System.Drawing.Size(897, 372);
+            this.txtFileViewer.Size = new System.Drawing.Size(893, 372);
             this.txtFileViewer.TabIndex = 2;
             this.txtFileViewer.Text = "";
             this.txtFileViewer.SelectionChanged += new System.EventHandler(this.txtFileViewer_SelectionChanged);
@@ -302,7 +302,7 @@
             this.statusStripResults.Location = new System.Drawing.Point(0, 370);
             this.statusStripResults.Name = "statusStripResults";
             this.statusStripResults.Padding = new System.Windows.Forms.Padding(0, 0, 7, 0);
-            this.statusStripResults.Size = new System.Drawing.Size(941, 22);
+            this.statusStripResults.Size = new System.Drawing.Size(943, 22);
             this.statusStripResults.TabIndex = 3;
             this.statusStripResults.Text = "statusStrip2";
             // 
@@ -374,7 +374,7 @@
             this.tvMatches.Location = new System.Drawing.Point(0, 23);
             this.tvMatches.Margin = new System.Windows.Forms.Padding(2);
             this.tvMatches.Name = "tvMatches";
-            this.tvMatches.Size = new System.Drawing.Size(935, 360);
+            this.tvMatches.Size = new System.Drawing.Size(933, 362);
             this.tvMatches.TabIndex = 4;
             this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
             this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
@@ -491,6 +491,16 @@
             this.splitContainerSideBar.SplitterWidth = 2;
             this.splitContainerSideBar.TabIndex = 0;
             // 
+            // btnAddAntonyms
+            // 
+            this.btnAddAntonyms.Location = new System.Drawing.Point(147, 40);
+            this.btnAddAntonyms.Name = "btnAddAntonyms";
+            this.btnAddAntonyms.Size = new System.Drawing.Size(107, 24);
+            this.btnAddAntonyms.TabIndex = 18;
+            this.btnAddAntonyms.Text = "Add antonyms";
+            this.btnAddAntonyms.UseVisualStyleBackColor = true;
+            this.btnAddAntonyms.Click += new System.EventHandler(this.btnAddAntonyms_Click);
+            // 
             // lblTargetCount
             // 
             this.lblTargetCount.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -536,7 +546,7 @@
             this.lbTargets.Location = new System.Drawing.Point(0, 21);
             this.lbTargets.Margin = new System.Windows.Forms.Padding(2);
             this.lbTargets.Name = "lbTargets";
-            this.lbTargets.Size = new System.Drawing.Size(254, 363);
+            this.lbTargets.Size = new System.Drawing.Size(254, 365);
             this.lbTargets.Sorted = true;
             this.lbTargets.TabIndex = 0;
             this.lbTargets.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lbTargets_ItemCheck);
@@ -555,16 +565,6 @@
             this.mnuCopy.Size = new System.Drawing.Size(102, 22);
             this.mnuCopy.Text = "Copy";
             this.mnuCopy.Click += new System.EventHandler(this.mnuCopy_Click);
-            // 
-            // btnAddAntonyms
-            // 
-            this.btnAddAntonyms.Location = new System.Drawing.Point(147, 40);
-            this.btnAddAntonyms.Name = "btnAddAntonyms";
-            this.btnAddAntonyms.Size = new System.Drawing.Size(107, 24);
-            this.btnAddAntonyms.TabIndex = 18;
-            this.btnAddAntonyms.Text = "Add antonyms";
-            this.btnAddAntonyms.UseVisualStyleBackColor = true;
-            this.btnAddAntonyms.Click += new System.EventHandler(this.btnAddAntonyms_Click);
             // 
             // MainForm
             // 
