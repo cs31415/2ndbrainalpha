@@ -1,8 +1,15 @@
 ﻿using System.Drawing;
+using System.Windows.Forms;
 using ScintillaNET;
 
 namespace _2ndbrainalpha
 {
+    public enum HighlightLayer
+    {
+        LineLayer = 7,
+		WordLayer = 8,
+    }
+
 	public class SciTextBox : Scintilla
 	{
 		/// <summary>
@@ -32,12 +39,12 @@ namespace _2ndbrainalpha
 			InitColors();
 			InitSyntaxColoring();
 			InitNumberMargin();
-		}
+        }
 
 		#region Public methods
-		public void HighlightSelection(int startIndex, int endIndex, Color color, int indicator)
+		public void HighlightSelection(int startIndex, int endIndex, Color color, HighlightLayer layer)
 		{
-			int NUM = indicator;
+			int NUM = (int)layer;
 
 			// Remove all uses of our indicator
 			this.IndicatorCurrent = NUM;
@@ -52,13 +59,21 @@ namespace _2ndbrainalpha
 			this.IndicatorFillRange(startIndex, endIndex - startIndex);
 		}
 
+        public void UnHighlightSelection(int startIndex, int endIndex, HighlightLayer layer)
+        {
+			int NUM = (int)layer;
+
+            // Remove all uses of our indicator
+            this.IndicatorCurrent = NUM;
+			this.IndicatorClearRange(startIndex, endIndex - startIndex);
+        }
+
 		public void HighlightWord(string text)
 		{
 			this.IndicatorCurrent = LINE_LAYER;
 			this.IndicatorClearRange(0, this.TextLength);
 			this.IndicatorCurrent = WORD_LAYER;
 			this.IndicatorClearRange(0, this.TextLength);
-			HighlightSelection(26, 578, Color.LightGoldenrodYellow, LINE_LAYER);
 
 			// Search the document
 			this.TargetStart = 0;
@@ -72,7 +87,7 @@ namespace _2ndbrainalpha
 			{
 				// Mark the search results with the current indicator
 				//this.IndicatorFillRange(this.TargetStart, this.TargetEnd - this.TargetStart);
-				HighlightSelection(this.TargetStart, this.TargetEnd, Color.Orange, WORD_LAYER);
+				HighlightSelection(this.TargetStart, this.TargetEnd, Color.Orange, HighlightLayer.WordLayer);
 
 				// Search the remainder of the document
 				this.TargetStart = this.TargetEnd;
@@ -117,7 +132,7 @@ namespace _2ndbrainalpha
             StyleResetDefault();
             Styles[Style.Default].Font = "Lucida Console";
             Styles[Style.Default].Size = 10;
-            Styles[Style.Default].BackColor = Color.White;
+            Styles[Style.Default].BackColor = Control.DefaultBackColor;
             Styles[Style.Default].ForeColor = Color.Black;
             StyleClearAll();
         }

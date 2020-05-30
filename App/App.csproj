@@ -95,12 +95,6 @@
     </Compile>
     <Compile Include="SearchParams.cs" />
     <Compile Include="Settings.cs" />
-    <Compile Include="SyncBuddyTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SyncTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="TargetWord.cs" />
     <Compile Include="Win32Msgs.cs" />
     <EmbeddedResource Include="MainForm.resx">

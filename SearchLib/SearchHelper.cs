@@ -103,7 +103,7 @@ namespace SearchLib
                                     return leftSpace && rightSpace;
                                 })
                                 .ToList()
-                                .Select(m => new Match(file, line, m.Word, currentLineNumber, m.Index, position + m.Index, position, endOfLinePosition))
+                                .Select(m => new Match(file, line, m.Word, 1+currentLineNumber, m.Index + 1, position + m.Index + 1, position + 1, endOfLinePosition + 1))
                             );
 
                         position = endOfLinePosition;
