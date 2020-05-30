@@ -27,9 +27,7 @@ namespace _2ndbrainalpha
         string _settingsFileName;
         private bool _expandedFirstNode;
         ConcurrentDictionary<string, TreeNode> _fileNodes;
-        private int _lastHighlightLineStartIndex;
-        private int _lastHighlightLineEndIndex;
-        private int _lastSelectedLineNumber;
+        private Match _lastSelectedMatch;
         private ConcurrentDictionary<string, FileMatchData> _matchResults;
         private bool _suspendFilters;
         private bool _lastFile;
@@ -41,7 +39,7 @@ namespace _2ndbrainalpha
         public MainForm()
         {
             InitializeComponent();
-            txtFileViewer.ScrollBars = RichTextBoxScrollBars.None;
+
             _searchHelper = new SearchHelper(CheckForCancellation, OnFile, OnFileMatch, OnMatch, OnException, OnComplete);
             var path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _settingsFileName = $@"{path}\settings.txt";
@@ -50,9 +48,27 @@ namespace _2ndbrainalpha
             _fileNodes = new ConcurrentDictionary<string, TreeNode>();
             _matchResults=new ConcurrentDictionary<string, FileMatchData>();
             _logger = new Logger(path);
+            txtFileViewer.UpdateUI += TxtFileViewer_UpdateUI; ;
+            txtFileViewer.Resize += TxtFileViewerOnResize ;
+            txtFileViewer.TextChanged += TxtFileViewerOnTextChanged;
         }
 
         #region Event handlers
+        private void TxtFileViewerOnTextChanged(object sender, EventArgs e)
+        {
+            UpdateStats();
+        }
+
+        private void TxtFileViewerOnResize(object sender, EventArgs e)
+        {
+            UpdateStats();
+        }
+
+        private void TxtFileViewer_UpdateUI(object sender, ScintillaNET.UpdateUIEventArgs e)
+        {
+            UpdateStats();
+        }
+
         private void btnSearch_Click(object sender, EventArgs e)
         {
             if (/*string.IsNullOrWhiteSpace(txtSearch.Text) && */string.IsNullOrWhiteSpace(txtTargets.Text)) 
@@ -70,8 +86,6 @@ namespace _2ndbrainalpha
             txtFileViewer.Text = "";
             _expandedFirstNode = false;
             _fileNodes.Clear();
-            _lastHighlightLineStartIndex = _lastHighlightLineEndIndex = 0;
-            _lastSelectedLineNumber = 0;
             _matchResults.Clear();
             _suspendFilters = true;
             _lastFile = false;
@@ -217,7 +231,12 @@ namespace _2ndbrainalpha
             var targetWords = TargetWords;
 
             // Look up antonym of search word
-            var antonyms = _antonymLookup.GetAntonyms(searchPattern).Distinct().ToList();
+            var antonyms = _antonymLookup.GetAntonyms(searchPattern)?.Distinct()?.ToList();
+            if (antonyms == null)
+            {
+                MessageBox.Show("No antonyms found");
+                return;
+            }
             foreach (var antonym in antonyms)
             {
                 if (!targetWords.Any(t => t.Equals(antonym, StringComparison.OrdinalIgnoreCase)))
@@ -230,7 +249,6 @@ namespace _2ndbrainalpha
 
         private void MainForm_Resize(object sender, EventArgs e)
         {
-            UpdateLineNumbers();
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -340,7 +358,6 @@ namespace _2ndbrainalpha
         private void cbTargetsToggle_CheckedChanged(object sender, EventArgs e)
         {
             txtFileViewer.SuspendLayout();
-            txtLineNumbers.SuspendLayout();
             TreeNode topNode = tvMatches.TopNode;
             tvMatches.SuspendLayout();
             _suspendFilters = true;
@@ -354,11 +371,18 @@ namespace _2ndbrainalpha
             tvMatches.TopNode = topNode;
             tvMatches.ResumeLayout();
             txtFileViewer.ResumeLayout();
-            txtLineNumbers.ResumeLayout();
         }
         #endregion
 
         #region Private methods
+        private void UpdateStats()
+        {
+            lblPosition.Text = (1 + txtFileViewer.CurrentPosition).ToString();
+            lblSelection.Text = txtFileViewer.SelectedText.Length.ToString();
+            lblLineNumber.Text = (1 + txtFileViewer.CurrentLine).ToString();
+            lblColumnNumber.Text = (1 + txtFileViewer.GetColumn(txtFileViewer.CurrentPosition)).ToString();
+        }
+
         private void CopySelectedNodeToClipboard(TreeView tv)
         {
             if (tvMatches.SelectedNode != null)
@@ -379,11 +403,13 @@ namespace _2ndbrainalpha
             {
                 // file node
                 file = node.Tag as string;
-                UnhighlightPreviousSelectedLine(node);
+                UnhighlightPreviousSelectedLine();
                 foreach (TreeNode childNode in node.Nodes)
                 {
-                    SelectNode(childNode, scrollToCaret);
+                    SelectNode(childNode, false);
                 }
+
+                return;
             }
             else
             {
@@ -400,7 +426,10 @@ namespace _2ndbrainalpha
             if (file != _currentFile)
             {
                 _currentFile = file;
+                _lastSelectedMatch = null;
+                txtFileViewer.ReadOnly = false;
                 txtFileViewer.Text = File.ReadAllText(file);
+                txtFileViewer.ReadOnly = true;
             }
 
             if (match != null)
@@ -408,80 +437,57 @@ namespace _2ndbrainalpha
                 if (scrollToCaret)
                 {
                     // unhighlight previously highlighted line, if any
-                    UnhighlightPreviousSelectedLine(node.Parent);
+                    UnhighlightPreviousSelectedLine();
+
+                    // unhighlight all words in current line
+                    UnHighlightSelection(match.LineStartIndex, match.LineEndIndex, HighlightLayer.HighlightWordLayer);
 
                     // highlight line
-                    HighlightSelection(match.LineStartIndex, match.LineEndIndex, Color.LightGoldenrodYellow);
-                    _lastHighlightLineStartIndex = match.LineStartIndex;
-                    _lastHighlightLineEndIndex = match.LineEndIndex;
-                    _lastSelectedLineNumber = match.LineNumber;
+                    HighlightSelection(match.LineStartIndex, match.LineEndIndex, Color.LightGoldenrodYellow, HighlightLayer.LineLayer);
+
+                    // highlight word
+                    HighlightSelection(match.Position, match.Position + match.Word.Length, Color.Orange, HighlightLayer.HighlightWordLayer);
 
                     // Scroll view if selection is out of visible range
-                    if (match.Position > txtFileViewer.BottomVisibleCharIndex || match.Position < txtFileViewer.TopVisibleCharIndex)
-                    {
-                        txtFileViewer.ScrollToCaret();
-                    }
+                    int scrollStart = Math.Max(match.LineStartIndex, 0);
+                    int scrollEnd = Math.Min(match.LineEndIndex, txtFileViewer.Text.Length - 1);
+                    txtFileViewer.ScrollRange(scrollStart-1, scrollEnd-1);
+                }
+                else
+                {
+                    HighlightSelection(match.Position, match.Position + match.Word.Length, Color.BurlyWood,
+                        HighlightLayer.WordLayer);
                 }
 
-                txtFileViewer.Select(match.Position, match.Word.Length);
-                txtFileViewer.SelectionBackColor = Color.Orange;
+                _lastSelectedMatch = match;
             }
             else
             {
-                txtFileViewer.Select(0, 0);
+                txtFileViewer.SetSelection(0, 0);
             }
 
             SetLineAndColumn();
         }
 
-        private void UnhighlightPreviousSelectedLine(TreeNode fileNode)
+        private void UnhighlightPreviousSelectedLine()
         {
-            if (_lastHighlightLineStartIndex >= 0 && _lastHighlightLineEndIndex > 0)
+            if (_lastSelectedMatch != null && _lastSelectedMatch.LineStartIndex >= 1 && _lastSelectedMatch.LineEndIndex > 1)
             {
-                HighlightSelection(_lastHighlightLineStartIndex, _lastHighlightLineEndIndex, txtFileViewer.BackColor);
+                UnHighlightSelection(_lastSelectedMatch.LineStartIndex, _lastSelectedMatch.LineEndIndex, HighlightLayer.LineLayer);
 
-                // restore matched word highlights
-                foreach (TreeNode childNode in fileNode.Nodes)
-                {
-                    var m = childNode.Tag as Match;
-                    if (m.LineNumber == _lastSelectedLineNumber)
-                    {
-                        SelectNode(childNode);
-                    }
-                }
+                // unhighlight last highlighted word
+                UnHighlightSelection(_lastSelectedMatch.LineStartIndex, _lastSelectedMatch.LineEndIndex, HighlightLayer.HighlightWordLayer);
             }
         }
 
-        private void HighlightSelection(int startIndex, int endIndex, Color color)
+        private void HighlightSelection(int startIndex, int endIndex, Color color, HighlightLayer layer)
         {
-            Debug.WriteLine($"start index = {startIndex}, length = {endIndex - startIndex}");
-            txtFileViewer.Select(startIndex, endIndex - startIndex);
-            txtFileViewer.SelectionBackColor = color;
+            txtFileViewer.HighlightSelection(startIndex - 1, endIndex - 1, color, layer);
         }
 
-        private void UpdateLineNumbers()
+        private void UnHighlightSelection(int startIndex, int endIndex, HighlightLayer layer)
         {
-            var sbLineNumbers = new StringBuilder();
-            var startCharIdx = 0;
-            var lineNum = 0;
-            var prevLineNum = lineNum;
-            var displayLineNum = 0;
-            foreach (var line in txtFileViewer.Lines)
-            {
-                prevLineNum = lineNum;
-                //if (!string.IsNullOrEmpty(line))
-                {
-                    sbLineNumbers.Append($"{displayLineNum + 1}");
-                    displayLineNum++;
-                }
-                startCharIdx = startCharIdx + line.Length + 1 /* for newline */;
-                lineNum = txtFileViewer.GetLineFromCharIndex(startCharIdx);
-                for (int i = 0; i < lineNum - prevLineNum; i++)
-                {
-                    sbLineNumbers.Append($"{Environment.NewLine}");
-                }
-            }
-            txtLineNumbers.Text = sbLineNumbers.ToString();
+            txtFileViewer.UnHighlightSelection(startIndex - 1, endIndex - 1, layer);
         }
 
         private void LoadSettings()
@@ -647,8 +653,6 @@ namespace _2ndbrainalpha
 
         private void OnFileMatch(string file, int count)
         {
-            _lastHighlightLineStartIndex = _lastHighlightLineEndIndex = 0;
-            _lastSelectedLineNumber = 0;
             if (!_matchResults.ContainsKey((file)))
             {
                 var fileMatchData = new FileMatchData(count);
@@ -690,7 +694,7 @@ namespace _2ndbrainalpha
                     OnComplete();
                 }
             }
-            AddMatchToResults(match, matchCount, false);
+            AddMatchToResults(match, matchCount, true);
         }
 
         private void AddFileToResults(string file, int count)
@@ -734,22 +738,24 @@ namespace _2ndbrainalpha
         {
             var onMatch = new Action<SearchLib.Match>(x =>
             {
-                var node = new TreeNode($"({1 + x.LineNumber},{1 + x.StartIndex}): {x.Line}");
+                var node = new TreeNode($"({x.LineNumber},{x.StartIndex}): {x.Line}");
                 node.Tag = match;
                 var nodes = tvMatches.Nodes.Find(match.File, false);
                 if (nodes.Length > 0)
                 {
                     var fileNode = nodes[0];
                     fileNode.Nodes.Add(node);
+                    /*if (selectNode)
+                    {
+                        SelectNode(node);
+                    }*/
                     if (fileNode.Nodes.Count == matchCount && !_expandedFirstNode)
                     {
                         _expandedFirstNode = true;
                         fileNode.Expand();
-                    }
-
-                    if (selectNode)
-                    {
                         SelectNode(node);
+                        SelectNode(fileNode.Nodes[0], true);
+                        tvMatches.SelectedNode = fileNode.Nodes[0];
                     }
                 }
             });
@@ -838,7 +844,7 @@ namespace _2ndbrainalpha
             var match = node.Tag as Match;
             string wordToHighlight = match.Word;
             int startPosition = match?.StartIndex ?? 0;
-            int offset = ($"({match.LineNumber+1},{match.StartIndex+1}): ").Length;
+            int offset = ($"({match.LineNumber},{match.StartIndex}): ").Length;
 
             var textSize = GetTextSize(g, text);
 
@@ -898,7 +904,7 @@ namespace _2ndbrainalpha
 
         private void SetLineAndColumn()
         {
-            var remainder = txtFileViewer.SelectionStart;
+            /*var remainder = txtFileViewer.SelectionStart;
             int lineNum = 0;
             int col = 1;
             bool found = false;
@@ -923,8 +929,11 @@ namespace _2ndbrainalpha
             }
             lblLineNumber.Text = found ? (lineNum + 1).ToString() : string.Empty;
             lblColumnNumber.Text = found ? col.ToString() : string.Empty;
-            lblPosition.Text = (txtFileViewer.SelectionStart + 1).ToString();
-            UpdateLineNumbers();
+            lblPosition.Text = (txtFileViewer.SelectionStart + 1).ToString();*/
+
+            lblLineNumber.Text = _lastSelectedMatch != null ? _lastSelectedMatch.LineNumber.ToString() : string.Empty;
+            lblColumnNumber.Text = _lastSelectedMatch != null ? _lastSelectedMatch.StartIndex.ToString() : string.Empty;
+            lblPosition.Text = _lastSelectedMatch != null ? _lastSelectedMatch.Position.ToString() : string.Empty; 
         }
 
         private void Log(string msg)

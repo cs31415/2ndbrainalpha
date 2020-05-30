@@ -1,9 +1,18 @@
 ﻿using System.Drawing;
+using System.Windows.Forms;
+using ScintillaNET;
 
-namespace ScintillaNET.Demo
+namespace _2ndbrainalpha
 {
-	public class SciTextBox : Scintilla
+    public enum HighlightLayer
     {
+        LineLayer = 7,
+		WordLayer = 8,
+		HighlightWordLayer = 9
+    }
+
+	public class SciTextBox : Scintilla
+	{
 		/// <summary>
 		/// change this to whatever margin you want the line numbers to show in
 		/// </summary>
@@ -14,9 +23,15 @@ namespace ScintillaNET.Demo
 		/// </summary>
 		private const int BOOKMARK_MARGIN = 2;
 		private const int BOOKMARK_MARKER = 2;
+        private const int HIGHLIGHT_WORD_LAYER = 9;
+		private const int WORD_LAYER = 8;
+        private const int LINE_LAYER = 7;
+
+		public int TopVisibleCharIndex => this.CharPositionFromPoint(1, 1);
+        public int BottomVisibleCharIndex => this.CharPositionFromPoint(this.Width - 1, this.Height - 1);
 
 		public SciTextBox()
-        {
+		{
 			Dock = System.Windows.Forms.DockStyle.Fill;
 
 			// INITIAL VIEW CONFIG
@@ -26,40 +41,65 @@ namespace ScintillaNET.Demo
 			InitColors();
 			InitSyntaxColoring();
 			InitNumberMargin();
-		}
-
-        private void InitColors()
-        {
-            SetSelectionBackColor(true, Color.White);
         }
 
-		private void InitSyntaxColoring()
+		#region Public methods
+		public void HighlightSelection(int startIndex, int endIndex, Color color, HighlightLayer layer)
 		{
-			// Configure the default style
-			StyleResetDefault();
-			Styles[Style.Default].Font = "Lucida Console";
-			Styles[Style.Default].Size = 10;
-			Styles[Style.Default].BackColor = Color.White;
-			Styles[Style.Default].ForeColor = Color.Black;
-			StyleClearAll();
+			int NUM = (int)layer;
+
+			// Remove all uses of our indicator
+			this.IndicatorCurrent = NUM;
+			//this.IndicatorClearRange(0, this.TextLength);
+
+			// Update indicator appearance
+			this.Indicators[NUM].Style = IndicatorStyle.FullBox;
+			this.Indicators[NUM].Under = true;
+			this.Indicators[NUM].ForeColor = color;
+			this.Indicators[NUM].Alpha = 200;
+
+			this.IndicatorFillRange(startIndex, endIndex - startIndex);
 		}
 
-		private void InitNumberMargin()
+        public void UnHighlightSelection(int startIndex, int endIndex, HighlightLayer layer)
+        {
+			int NUM = (int)layer;
+
+            // Remove all uses of our indicator
+            this.IndicatorCurrent = NUM;
+			this.IndicatorClearRange(startIndex, endIndex - startIndex);
+        }
+
+		public void HighlightWord(string text)
 		{
+			this.IndicatorCurrent = LINE_LAYER;
+			this.IndicatorClearRange(0, this.TextLength);
+			this.IndicatorCurrent = WORD_LAYER;
+			this.IndicatorClearRange(0, this.TextLength);
 
-			Styles[Style.LineNumber].BackColor = Color.LightGray;
-			//TextArea.Styles[Style.IndentGuide].ForeColor = IntToColor(FORE_COLOR);
-			//TextArea.Styles[Style.IndentGuide].BackColor = IntToColor(BACK_COLOR);
+			// Search the document
+			this.TargetStart = 0;
+			this.TargetEnd = this.TextLength;
+			this.SearchFlags = SearchFlags.None;
 
-			var nums = Margins[NUMBER_MARGIN];
-			nums.Width = 30;
-			nums.Type = MarginType.Number;
-			nums.Sensitive = true;
-			nums.Mask = 0;
+			if (string.IsNullOrEmpty(text))
+				return;
 
-			MarginClick += TextArea_MarginClick;
+			while (this.SearchInTarget(text) != -1)
+			{
+				// Mark the search results with the current indicator
+				//this.IndicatorFillRange(this.TargetStart, this.TargetEnd - this.TargetStart);
+				HighlightSelection(this.TargetStart, this.TargetEnd, Color.Orange, HighlightLayer.WordLayer);
+
+				// Search the remainder of the document
+				this.TargetStart = this.TargetEnd;
+				this.TargetEnd = this.TextLength;
+			}
 		}
 
+		#endregion
+
+        #region Event handlers
 		private void TextArea_MarginClick(object sender, MarginClickEventArgs e)
 		{
 			if (e.Margin == BOOKMARK_MARGIN)
@@ -79,5 +119,42 @@ namespace ScintillaNET.Demo
 				}
 			}
 		}
+
+		#endregion
+
+		#region Private methods
+		private void InitColors()
+        {
+            SetSelectionBackColor(true, Color.White);
+        }
+
+        private void InitSyntaxColoring()
+        {
+            // Configure the default style
+            StyleResetDefault();
+            Styles[Style.Default].Font = "Lucida Console";
+            Styles[Style.Default].Size = 10;
+            Styles[Style.Default].BackColor = Control.DefaultBackColor;
+            Styles[Style.Default].ForeColor = Color.Black;
+            StyleClearAll();
+        }
+
+        private void InitNumberMargin()
+        {
+
+            Styles[Style.LineNumber].BackColor = Color.LightGray;
+            //this.Styles[Style.IndentGuide].ForeColor = IntToColor(FORE_COLOR);
+            //this.Styles[Style.IndentGuide].BackColor = IntToColor(BACK_COLOR);
+
+            var nums = Margins[NUMBER_MARGIN];
+            nums.Width = 30;
+            nums.Type = MarginType.Number;
+            nums.Sensitive = true;
+            nums.Mask = 0;
+
+            MarginClick += TextArea_MarginClick;
+        }
+
+        #endregion 
 	}
 }

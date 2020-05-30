@@ -77,7 +77,6 @@ namespace SearchLib
                     // TODO: StringSplitOptions.RemoveEmptyEntries is creating a problem with incorrect line numbers for matches!
                     var lines = text.Split(new[] {"\r\n", "\n", "\r"}, StringSplitOptions.None);
                     var currentLineNumber = 0;
-                    var nMatches = 0;
                     var matches = new List<Match>();
                     int position = 0;
                     int endOfLinePosition = 0;
@@ -103,7 +102,7 @@ namespace SearchLib
                                     return leftSpace && rightSpace;
                                 })
                                 .ToList()
-                                .Select(m => new Match(file, line, m.Word, currentLineNumber, m.Index, position + m.Index, position, endOfLinePosition))
+                                .Select(m => new Match(file, line, m.Word, 1+currentLineNumber, m.Index + 1, position + m.Index + 1, position + 1, endOfLinePosition + 1))
                             );
 
                         position = endOfLinePosition;
@@ -111,13 +110,12 @@ namespace SearchLib
                     }
                     if (matches.Any())
                     {
-                        var count = matches.Count();
-                        OnFileMatch(file, count);
-                    }
-
-                    foreach (var m in matches)
-                    {
-                        OnMatch(m, ++nMatches);
+                        var matchCount = matches.Count();
+                        OnFileMatch(file, matchCount);
+                        foreach (var m in matches)
+                        {
+                            OnMatch(m, matchCount);
+                        }
                     }
                 }
             }
