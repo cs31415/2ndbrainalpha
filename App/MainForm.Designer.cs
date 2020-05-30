@@ -75,7 +75,6 @@
             this.lbTargets = new System.Windows.Forms.CheckedListBox();
             this.ctxMenuFileNode = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuCopy = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnUnhighlight = new System.Windows.Forms.Button();
             this.lblLinesOnScreen = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStrip1.SuspendLayout();
             this.statusStripBottom.SuspendLayout();
@@ -542,16 +541,6 @@
             this.mnuCopy.Text = "Copy";
             this.mnuCopy.Click += new System.EventHandler(this.mnuCopy_Click);
             // 
-            // btnUnhighlight
-            // 
-            this.btnUnhighlight.Location = new System.Drawing.Point(805, 1);
-            this.btnUnhighlight.Name = "btnUnhighlight";
-            this.btnUnhighlight.Size = new System.Drawing.Size(111, 23);
-            this.btnUnhighlight.TabIndex = 17;
-            this.btnUnhighlight.Text = "Unhighlight Line";
-            this.btnUnhighlight.UseVisualStyleBackColor = true;
-            this.btnUnhighlight.Click += new System.EventHandler(this.btnUnhighlight_Click);
-            // 
             // lblLinesOnScreen
             // 
             this.lblLinesOnScreen.Name = "lblLinesOnScreen";
@@ -565,7 +554,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(1189, 823);
-            this.Controls.Add(this.btnUnhighlight);
             this.Controls.Add(this.splitContainerMaster);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnSearch);
@@ -655,7 +643,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.Button btnAddAntonyms;
         private SciTextBox txtFileViewer;
-        private System.Windows.Forms.Button btnUnhighlight;
         private System.Windows.Forms.ToolStripStatusLabel lblLinesOnScreen;
     }
 }

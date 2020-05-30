@@ -24,13 +24,17 @@ namespace ThesaurusLib
                 {
                     fs.Seek(lineNumber, SeekOrigin.Begin);
                     var hdr = reader.ReadLine();
-                    var nLines = Convert.ToInt32(hdr.Split('|')[1]);
-                    for (int i = 0; i < nLines; i++)
+                    if (!string.IsNullOrWhiteSpace(hdr))
                     {
-                        var line = reader.ReadLine();
-                        var words = line.Split('|');
-                        var type = Regex.Replace(words[0], @"[()]", "");
-                        synonyms = synonyms.Concat(words.Skip(1).Where(w => w.Trim() != word).Select(w => new Entry { Type = type.Trim(), Word = w.Trim() })).ToList();
+                        int.TryParse(hdr.Split('|')[1], out var nLines);
+                        for (int i = 0; i < nLines; i++)
+                        {
+                            var line = reader.ReadLine();
+                            var words = line.Split('|');
+                            var type = Regex.Replace(words[0], @"[()]", "");
+                            synonyms = synonyms.Concat(words.Skip(1).Where(w => w.Trim() != word)
+                                .Select(w => new Entry {Type = type.Trim(), Word = w.Trim()})).ToList();
+                        }
                     }
                 }
             }

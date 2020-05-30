@@ -8,6 +8,7 @@ namespace _2ndbrainalpha
     {
         LineLayer = 7,
 		WordLayer = 8,
+		HighlightWordLayer = 9
     }
 
 	public class SciTextBox : Scintilla
@@ -22,7 +23,8 @@ namespace _2ndbrainalpha
 		/// </summary>
 		private const int BOOKMARK_MARGIN = 2;
 		private const int BOOKMARK_MARKER = 2;
-        private const int WORD_LAYER = 8;
+        private const int HIGHLIGHT_WORD_LAYER = 9;
+		private const int WORD_LAYER = 8;
         private const int LINE_LAYER = 7;
 
 		public int TopVisibleCharIndex => this.CharPositionFromPoint(1, 1);
