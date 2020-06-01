@@ -266,6 +266,26 @@ namespace _2ndbrainalpha
             CopySelectedNodeToClipboard(tvMatches);
         }
 
+        private void mnuEdit_Click(object sender, EventArgs e)
+        {
+            var node = tvMatches.SelectedNode;
+            var match = node.Tag as SearchLib.Match;
+            string fileName;
+
+            if (match == null)
+            {
+                // file node
+                fileName = node.Tag as string;
+            }
+            else
+            {
+                // match node
+                fileName = match.File;
+            }
+
+            Process.Start(fileName);
+        }
+
         private void tvMatches_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyData == (Keys.Control | Keys.C))
@@ -763,6 +783,7 @@ namespace _2ndbrainalpha
             if (this.InvokeRequired)
             {
                 this.Invoke(onMatch, match);
+
             }
             else
             {

@@ -59,6 +59,7 @@
             this.lblPosition = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel7 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblSelection = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblLinesOnScreen = new System.Windows.Forms.ToolStripStatusLabel();
             this.cbExpandAll = new System.Windows.Forms.CheckBox();
             this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
             this.btnSearch = new System.Windows.Forms.Button();
@@ -75,7 +76,7 @@
             this.lbTargets = new System.Windows.Forms.CheckedListBox();
             this.ctxMenuFileNode = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuCopy = new System.Windows.Forms.ToolStripMenuItem();
-            this.lblLinesOnScreen = new System.Windows.Forms.ToolStripStatusLabel();
+            this.mnuEdit = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.statusStripBottom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).BeginInit();
@@ -243,7 +244,7 @@
             this.splitContainerResults.Panel2.AutoScroll = true;
             this.splitContainerResults.Panel2.Controls.Add(this.cbExpandAll);
             this.splitContainerResults.Panel2.Controls.Add(this.tvMatches);
-            this.splitContainerResults.Size = new System.Drawing.Size(947, 774);
+            this.splitContainerResults.Size = new System.Drawing.Size(949, 774);
             this.splitContainerResults.SplitterDistance = 392;
             this.splitContainerResults.SplitterWidth = 2;
             this.splitContainerResults.TabIndex = 5;
@@ -257,7 +258,7 @@
             this.txtFileViewer.Location = new System.Drawing.Point(-1, 0);
             this.txtFileViewer.Name = "txtFileViewer";
             this.txtFileViewer.ReadOnly = true;
-            this.txtFileViewer.Size = new System.Drawing.Size(934, 369);
+            this.txtFileViewer.Size = new System.Drawing.Size(936, 369);
             this.txtFileViewer.TabIndex = 4;
             this.txtFileViewer.WrapMode = ScintillaNET.WrapMode.Word;
             // 
@@ -277,7 +278,7 @@
             this.statusStripResults.Location = new System.Drawing.Point(0, 370);
             this.statusStripResults.Name = "statusStripResults";
             this.statusStripResults.Padding = new System.Windows.Forms.Padding(0, 0, 7, 0);
-            this.statusStripResults.Size = new System.Drawing.Size(947, 22);
+            this.statusStripResults.Size = new System.Drawing.Size(949, 22);
             this.statusStripResults.TabIndex = 3;
             this.statusStripResults.Text = "statusStrip2";
             // 
@@ -325,6 +326,12 @@
             this.lblSelection.Name = "lblSelection";
             this.lblSelection.Size = new System.Drawing.Size(0, 17);
             // 
+            // lblLinesOnScreen
+            // 
+            this.lblLinesOnScreen.Name = "lblLinesOnScreen";
+            this.lblLinesOnScreen.Size = new System.Drawing.Size(31, 17);
+            this.lblLinesOnScreen.Text = "lines";
+            // 
             // cbExpandAll
             // 
             this.cbExpandAll.AutoSize = true;
@@ -349,7 +356,7 @@
             this.tvMatches.Location = new System.Drawing.Point(0, 23);
             this.tvMatches.Margin = new System.Windows.Forms.Padding(2);
             this.tvMatches.Name = "tvMatches";
-            this.tvMatches.Size = new System.Drawing.Size(933, 357);
+            this.tvMatches.Size = new System.Drawing.Size(935, 359);
             this.tvMatches.TabIndex = 4;
             this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
             this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
@@ -521,7 +528,7 @@
             this.lbTargets.Location = new System.Drawing.Point(0, 21);
             this.lbTargets.Margin = new System.Windows.Forms.Padding(2);
             this.lbTargets.Name = "lbTargets";
-            this.lbTargets.Size = new System.Drawing.Size(254, 369);
+            this.lbTargets.Size = new System.Drawing.Size(254, 371);
             this.lbTargets.Sorted = true;
             this.lbTargets.TabIndex = 0;
             this.lbTargets.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lbTargets_ItemCheck);
@@ -530,22 +537,24 @@
             // 
             this.ctxMenuFileNode.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.ctxMenuFileNode.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuCopy});
+            this.mnuCopy,
+            this.mnuEdit});
             this.ctxMenuFileNode.Name = "ctxMenuFileNode";
-            this.ctxMenuFileNode.Size = new System.Drawing.Size(103, 26);
+            this.ctxMenuFileNode.Size = new System.Drawing.Size(181, 70);
             // 
             // mnuCopy
             // 
             this.mnuCopy.Name = "mnuCopy";
-            this.mnuCopy.Size = new System.Drawing.Size(102, 22);
+            this.mnuCopy.Size = new System.Drawing.Size(180, 22);
             this.mnuCopy.Text = "Copy";
             this.mnuCopy.Click += new System.EventHandler(this.mnuCopy_Click);
             // 
-            // lblLinesOnScreen
+            // mnuEdit
             // 
-            this.lblLinesOnScreen.Name = "lblLinesOnScreen";
-            this.lblLinesOnScreen.Size = new System.Drawing.Size(31, 17);
-            this.lblLinesOnScreen.Text = "lines";
+            this.mnuEdit.Name = "mnuEdit";
+            this.mnuEdit.Size = new System.Drawing.Size(180, 22);
+            this.mnuEdit.Text = "Edit";
+            this.mnuEdit.Click += new System.EventHandler(this.mnuEdit_Click);
             // 
             // MainForm
             // 
@@ -644,6 +653,7 @@
         private System.Windows.Forms.Button btnAddAntonyms;
         private SciTextBox txtFileViewer;
         private System.Windows.Forms.ToolStripStatusLabel lblLinesOnScreen;
+        private System.Windows.Forms.ToolStripMenuItem mnuEdit;
     }
 }
 
