@@ -3,17 +3,24 @@
     public class Match
     {
         public string File { get; set; }
+        
         public string Line { get; set; }
+        
         public string Word { get; set; }
-        // starts from 1
+
+        // character position of match word within file; starts from 1
         public int Position { get; set; }
+        
         // starts from 1
         public int LineNumber { get; set; }
-        // starts from 1
+
+        // index of match word within the line; starts from 1
         public int StartIndex { get; set; }
-        // starts from 1
+        
+        // index of match line start within the file; starts from 1
         public int LineStartIndex { get; set; }
-        // starts from 1
+
+        // index of match line end within the file; starts from 1
         public int LineEndIndex { get; set; }
 
         public Match(

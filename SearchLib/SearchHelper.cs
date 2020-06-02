@@ -75,20 +75,22 @@ namespace SearchLib
                 {
                     var text = await reader.ReadToEndAsync();
                     // TODO: StringSplitOptions.RemoveEmptyEntries is creating a problem with incorrect line numbers for matches!
-                    var lines = text.Split(new[] {"\r\n", "\n", "\r"}, StringSplitOptions.None);
+                    //var lines = text.Split(new[] {"\r\n", "\n", "\r"}, StringSplitOptions.None);
+                    var matchLines = Regex.Matches(text, @"^.*$((\r\n)|\n|\r)", RegexOptions.Multiline | RegexOptions.Compiled);
                     var currentLineNumber = 0;
                     var matches = new List<Match>();
                     int position = 0;
                     int endOfLinePosition = 0;
-                    foreach (var line in lines)
+                    foreach (System.Text.RegularExpressions.Match matchLine in matchLines)
                     {
                         if (_checkForCancellation())
                         {
                             return;
                         }
 
-                        var carriageReturn = line.Length > 0 && line.ToCharArray()[line.Length - 1] == '\r';
-                        endOfLinePosition = position + line.Length + (carriageReturn ? 0 : 1);
+                        var line = matchLine.Value;
+                        //var carriageReturn = line.Length > 0 && line.ToCharArray()[line.Length - 1] == '\r';
+                        endOfLinePosition = position + line.Length /*+ (carriageReturn ? 0 : 1)*/;
 
                         matches.AddRange(                            
                             trie

@@ -268,22 +268,11 @@ namespace _2ndbrainalpha
 
         private void mnuEdit_Click(object sender, EventArgs e)
         {
-            var node = tvMatches.SelectedNode;
-            var match = node.Tag as SearchLib.Match;
-            string fileName;
-
-            if (match == null)
+            var fileName = GetFileName(tvMatches.SelectedNode);
+            if (!string.IsNullOrWhiteSpace(fileName))
             {
-                // file node
-                fileName = node.Tag as string;
+                Process.Start(fileName);
             }
-            else
-            {
-                // match node
-                fileName = match.File;
-            }
-
-            Process.Start(fileName);
         }
 
         private void tvMatches_KeyDown(object sender, KeyEventArgs e)
@@ -411,6 +400,12 @@ namespace _2ndbrainalpha
             }
         }
 
+        private string GetFileName(TreeNode node)
+        {
+            var match = node?.Tag as SearchLib.Match;
+            return match == null ? node.Tag as string : match.File;
+        }
+
         private void SelectNode(TreeNode node, bool scrollToCaret = false)
         {
             if (node == null)
@@ -450,6 +445,7 @@ namespace _2ndbrainalpha
                 txtFileViewer.ReadOnly = false;
                 txtFileViewer.Text = File.ReadAllText(file);
                 txtFileViewer.ReadOnly = true;
+                lblFileName.Text = file;
             }
 
             if (match != null)
@@ -466,6 +462,7 @@ namespace _2ndbrainalpha
                     HighlightSelection(match.LineStartIndex, match.LineEndIndex, Color.LightGoldenrodYellow, HighlightLayer.LineLayer);
 
                     // highlight word
+                    //Debug.WriteLine($"{file}, {match.Position}, {match.Position + match.Word.Length}");
                     HighlightSelection(match.Position, match.Position + match.Word.Length, Color.Orange, HighlightLayer.HighlightWordLayer);
 
                     // Scroll view if selection is out of visible range
@@ -765,15 +762,11 @@ namespace _2ndbrainalpha
                 {
                     var fileNode = nodes[0];
                     fileNode.Nodes.Add(node);
-                    /*if (selectNode)
-                    {
-                        SelectNode(node);
-                    }*/
                     if (fileNode.Nodes.Count == matchCount && !_expandedFirstNode)
                     {
                         _expandedFirstNode = true;
                         fileNode.Expand();
-                        SelectNode(node);
+                        SelectNode(fileNode);
                         SelectNode(fileNode.Nodes[0], true);
                         tvMatches.SelectedNode = fileNode.Nodes[0];
                     }
@@ -864,7 +857,7 @@ namespace _2ndbrainalpha
             string text = node.Text;
             var match = node.Tag as Match;
             string wordToHighlight = match.Word;
-            int startPosition = match?.StartIndex ?? 0;
+            int startPosition = (match?.StartIndex - 1) ?? 0;
             int offset = ($"({match.LineNumber},{match.StartIndex}): ").Length;
 
             var textSize = GetTextSize(g, text);
@@ -893,11 +886,12 @@ namespace _2ndbrainalpha
                 //Draw the current word.
                 size = GetTextSize(g, word);
                 var highlight = wordWithHighlightStatus.Item2 && (currentPos - offset) == startPosition ;
+                Color highlightColor = node.IsSelected ? Color.Orange : Color.BurlyWood;
                 DrawText(g,
                      word,
                      location,
                      Color.Black,
-                     highlight ? Color.Orange : Color.Transparent);
+                     highlight ? highlightColor : Color.Transparent);
                 location.Offset(size.Width, 0);
                 currentPos += word.Length;
             }
@@ -957,11 +951,6 @@ namespace _2ndbrainalpha
             lblPosition.Text = _lastSelectedMatch != null ? _lastSelectedMatch.Position.ToString() : string.Empty; 
         }
 
-        private void Log(string msg)
-        {
-            _logger.Log(msg);
-        }
-        
         private void LogEx(Exception ex)
         {
             _logger.LogException(ex);

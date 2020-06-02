@@ -37,7 +37,7 @@ namespace _2ndbrainalpha
 			// INITIAL VIEW CONFIG
 			WrapMode = WrapMode.Word;
 			IndentationGuides = IndentView.LookBoth;
-
+			
 			InitColors();
 			InitSyntaxColoring();
 			InitNumberMargin();
@@ -125,7 +125,7 @@ namespace _2ndbrainalpha
 		#region Private methods
 		private void InitColors()
         {
-            SetSelectionBackColor(true, Color.White);
+            SetSelectionBackColor(true, Color.CornflowerBlue);
         }
 
         private void InitSyntaxColoring()

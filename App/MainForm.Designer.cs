@@ -49,7 +49,6 @@
             this.lblMaxFileCount = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.splitContainerResults = new System.Windows.Forms.SplitContainer();
-            this.txtFileViewer = new _2ndbrainalpha.SciTextBox();
             this.statusStripResults = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblLineNumber = new System.Windows.Forms.ToolStripStatusLabel();
@@ -59,9 +58,7 @@
             this.lblPosition = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel7 = new System.Windows.Forms.ToolStripStatusLabel();
             this.lblSelection = new System.Windows.Forms.ToolStripStatusLabel();
-            this.lblLinesOnScreen = new System.Windows.Forms.ToolStripStatusLabel();
             this.cbExpandAll = new System.Windows.Forms.CheckBox();
-            this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
@@ -77,6 +74,10 @@
             this.ctxMenuFileNode = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuEdit = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblFileName = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel8 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.txtFileViewer = new _2ndbrainalpha.SciTextBox();
+            this.tvMatches = new _2ndbrainalpha.BufferedTreeView();
             this.toolStrip1.SuspendLayout();
             this.statusStripBottom.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainerResults)).BeginInit();
@@ -244,23 +245,10 @@
             this.splitContainerResults.Panel2.AutoScroll = true;
             this.splitContainerResults.Panel2.Controls.Add(this.cbExpandAll);
             this.splitContainerResults.Panel2.Controls.Add(this.tvMatches);
-            this.splitContainerResults.Size = new System.Drawing.Size(949, 774);
+            this.splitContainerResults.Size = new System.Drawing.Size(953, 774);
             this.splitContainerResults.SplitterDistance = 392;
             this.splitContainerResults.SplitterWidth = 2;
             this.splitContainerResults.TabIndex = 5;
-            // 
-            // txtFileViewer
-            // 
-            this.txtFileViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtFileViewer.IndentationGuides = ScintillaNET.IndentView.LookBoth;
-            this.txtFileViewer.Location = new System.Drawing.Point(-1, 0);
-            this.txtFileViewer.Name = "txtFileViewer";
-            this.txtFileViewer.ReadOnly = true;
-            this.txtFileViewer.Size = new System.Drawing.Size(936, 369);
-            this.txtFileViewer.TabIndex = 4;
-            this.txtFileViewer.WrapMode = ScintillaNET.WrapMode.Word;
             // 
             // statusStripResults
             // 
@@ -274,11 +262,12 @@
             this.lblPosition,
             this.toolStripStatusLabel7,
             this.lblSelection,
-            this.lblLinesOnScreen});
+            this.toolStripStatusLabel8,
+            this.lblFileName});
             this.statusStripResults.Location = new System.Drawing.Point(0, 370);
             this.statusStripResults.Name = "statusStripResults";
             this.statusStripResults.Padding = new System.Windows.Forms.Padding(0, 0, 7, 0);
-            this.statusStripResults.Size = new System.Drawing.Size(949, 22);
+            this.statusStripResults.Size = new System.Drawing.Size(953, 22);
             this.statusStripResults.TabIndex = 3;
             this.statusStripResults.Text = "statusStrip2";
             // 
@@ -326,12 +315,6 @@
             this.lblSelection.Name = "lblSelection";
             this.lblSelection.Size = new System.Drawing.Size(0, 17);
             // 
-            // lblLinesOnScreen
-            // 
-            this.lblLinesOnScreen.Name = "lblLinesOnScreen";
-            this.lblLinesOnScreen.Size = new System.Drawing.Size(31, 17);
-            this.lblLinesOnScreen.Text = "lines";
-            // 
             // cbExpandAll
             // 
             this.cbExpandAll.AutoSize = true;
@@ -343,26 +326,6 @@
             this.cbExpandAll.Text = "Expand/collapse all";
             this.cbExpandAll.UseVisualStyleBackColor = true;
             this.cbExpandAll.CheckedChanged += new System.EventHandler(this.cbExpandAll_CheckedChanged);
-            // 
-            // tvMatches
-            // 
-            this.tvMatches.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tvMatches.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
-            this.tvMatches.FullRowSelect = true;
-            this.tvMatches.HideSelection = false;
-            this.tvMatches.LineColor = System.Drawing.Color.DimGray;
-            this.tvMatches.Location = new System.Drawing.Point(0, 23);
-            this.tvMatches.Margin = new System.Windows.Forms.Padding(2);
-            this.tvMatches.Name = "tvMatches";
-            this.tvMatches.Size = new System.Drawing.Size(935, 359);
-            this.tvMatches.TabIndex = 4;
-            this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
-            this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
-            this.tvMatches.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyDown);
-            this.tvMatches.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyUp);
-            this.tvMatches.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tvMatches_MouseDown);
             // 
             // btnSearch
             // 
@@ -528,7 +491,7 @@
             this.lbTargets.Location = new System.Drawing.Point(0, 21);
             this.lbTargets.Margin = new System.Windows.Forms.Padding(2);
             this.lbTargets.Name = "lbTargets";
-            this.lbTargets.Size = new System.Drawing.Size(254, 371);
+            this.lbTargets.Size = new System.Drawing.Size(254, 375);
             this.lbTargets.Sorted = true;
             this.lbTargets.TabIndex = 0;
             this.lbTargets.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.lbTargets_ItemCheck);
@@ -540,21 +503,70 @@
             this.mnuCopy,
             this.mnuEdit});
             this.ctxMenuFileNode.Name = "ctxMenuFileNode";
-            this.ctxMenuFileNode.Size = new System.Drawing.Size(181, 70);
+            this.ctxMenuFileNode.Size = new System.Drawing.Size(103, 48);
             // 
             // mnuCopy
             // 
             this.mnuCopy.Name = "mnuCopy";
-            this.mnuCopy.Size = new System.Drawing.Size(180, 22);
+            this.mnuCopy.Size = new System.Drawing.Size(102, 22);
             this.mnuCopy.Text = "Copy";
             this.mnuCopy.Click += new System.EventHandler(this.mnuCopy_Click);
             // 
             // mnuEdit
             // 
             this.mnuEdit.Name = "mnuEdit";
-            this.mnuEdit.Size = new System.Drawing.Size(180, 22);
+            this.mnuEdit.Size = new System.Drawing.Size(102, 22);
             this.mnuEdit.Text = "Edit";
             this.mnuEdit.Click += new System.EventHandler(this.mnuEdit_Click);
+            // 
+            // lblFileName
+            // 
+            this.lblFileName.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.lblFileName.Name = "lblFileName";
+            this.lblFileName.Size = new System.Drawing.Size(56, 17);
+            this.lblFileName.Text = "file name";
+            // 
+            // toolStripStatusLabel8
+            // 
+            this.toolStripStatusLabel8.Name = "toolStripStatusLabel8";
+            this.toolStripStatusLabel8.Size = new System.Drawing.Size(10, 17);
+            this.toolStripStatusLabel8.Text = "|";
+            // 
+            // txtFileViewer
+            // 
+            this.txtFileViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFileViewer.EdgeMode = ScintillaNET.EdgeMode.MultiLine;
+            this.txtFileViewer.IndentationGuides = ScintillaNET.IndentView.LookBoth;
+            this.txtFileViewer.Location = new System.Drawing.Point(-1, 0);
+            this.txtFileViewer.Name = "txtFileViewer";
+            this.txtFileViewer.ReadOnly = true;
+            this.txtFileViewer.Size = new System.Drawing.Size(934, 369);
+            this.txtFileViewer.TabIndex = 4;
+            this.txtFileViewer.ViewEol = true;
+            this.txtFileViewer.ViewWhitespace = ScintillaNET.WhitespaceMode.VisibleAlways;
+            this.txtFileViewer.WrapMode = ScintillaNET.WrapMode.Word;
+            // 
+            // tvMatches
+            // 
+            this.tvMatches.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tvMatches.DrawMode = System.Windows.Forms.TreeViewDrawMode.OwnerDrawText;
+            this.tvMatches.FullRowSelect = true;
+            this.tvMatches.HideSelection = false;
+            this.tvMatches.LineColor = System.Drawing.Color.DimGray;
+            this.tvMatches.Location = new System.Drawing.Point(0, 23);
+            this.tvMatches.Margin = new System.Windows.Forms.Padding(2);
+            this.tvMatches.Name = "tvMatches";
+            this.tvMatches.Size = new System.Drawing.Size(933, 363);
+            this.tvMatches.TabIndex = 4;
+            this.tvMatches.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvMatches_DrawNode);
+            this.tvMatches.NodeMouseClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvMatches_NodeMouseClick);
+            this.tvMatches.KeyDown += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyDown);
+            this.tvMatches.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tvMatches_KeyUp);
+            this.tvMatches.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tvMatches_MouseDown);
             // 
             // MainForm
             // 
@@ -652,8 +664,9 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.Button btnAddAntonyms;
         private SciTextBox txtFileViewer;
-        private System.Windows.Forms.ToolStripStatusLabel lblLinesOnScreen;
         private System.Windows.Forms.ToolStripMenuItem mnuEdit;
+        private System.Windows.Forms.ToolStripStatusLabel lblFileName;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel8;
     }
 }
 
