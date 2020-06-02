@@ -523,8 +523,7 @@
             // 
             this.lblFileName.BackColor = System.Drawing.SystemColors.ControlLight;
             this.lblFileName.Name = "lblFileName";
-            this.lblFileName.Size = new System.Drawing.Size(56, 17);
-            this.lblFileName.Text = "file name";
+            this.lblFileName.Size = new System.Drawing.Size(0, 17);
             // 
             // toolStripStatusLabel8
             // 
@@ -542,7 +541,7 @@
             this.txtFileViewer.Location = new System.Drawing.Point(-1, 0);
             this.txtFileViewer.Name = "txtFileViewer";
             this.txtFileViewer.ReadOnly = true;
-            this.txtFileViewer.Size = new System.Drawing.Size(934, 369);
+            this.txtFileViewer.Size = new System.Drawing.Size(934, 373);
             this.txtFileViewer.TabIndex = 4;
             this.txtFileViewer.ViewEol = true;
             this.txtFileViewer.ViewWhitespace = ScintillaNET.WhitespaceMode.VisibleAlways;
