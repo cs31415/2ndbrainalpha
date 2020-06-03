@@ -23,12 +23,6 @@ namespace _2ndbrainalpha
 		/// </summary>
 		private const int BOOKMARK_MARGIN = 2;
 		private const int BOOKMARK_MARKER = 2;
-        private const int HIGHLIGHT_WORD_LAYER = 9;
-		private const int WORD_LAYER = 8;
-        private const int LINE_LAYER = 7;
-
-		public int TopVisibleCharIndex => this.CharPositionFromPoint(1, 1);
-        public int BottomVisibleCharIndex => this.CharPositionFromPoint(this.Width - 1, this.Height - 1);
 
 		public SciTextBox()
 		{
@@ -50,7 +44,6 @@ namespace _2ndbrainalpha
 
 			// Remove all uses of our indicator
 			this.IndicatorCurrent = NUM;
-			//this.IndicatorClearRange(0, this.TextLength);
 
 			// Update indicator appearance
 			this.Indicators[NUM].Style = IndicatorStyle.FullBox;
@@ -69,33 +62,6 @@ namespace _2ndbrainalpha
             this.IndicatorCurrent = NUM;
 			this.IndicatorClearRange(startIndex, endIndex - startIndex);
         }
-
-		public void HighlightWord(string text)
-		{
-			this.IndicatorCurrent = LINE_LAYER;
-			this.IndicatorClearRange(0, this.TextLength);
-			this.IndicatorCurrent = WORD_LAYER;
-			this.IndicatorClearRange(0, this.TextLength);
-
-			// Search the document
-			this.TargetStart = 0;
-			this.TargetEnd = this.TextLength;
-			this.SearchFlags = SearchFlags.None;
-
-			if (string.IsNullOrEmpty(text))
-				return;
-
-			while (this.SearchInTarget(text) != -1)
-			{
-				// Mark the search results with the current indicator
-				//this.IndicatorFillRange(this.TargetStart, this.TargetEnd - this.TargetStart);
-				HighlightSelection(this.TargetStart, this.TargetEnd, Color.Orange, HighlightLayer.WordLayer);
-
-				// Search the remainder of the document
-				this.TargetStart = this.TargetEnd;
-				this.TargetEnd = this.TextLength;
-			}
-		}
 
 		#endregion
 
@@ -125,7 +91,8 @@ namespace _2ndbrainalpha
 		#region Private methods
 		private void InitColors()
         {
-            SetSelectionBackColor(true, Color.CornflowerBlue);
+            SetSelectionBackColor(true, Color.LightBlue);
+            SetWhitespaceForeColor(true, Color.DarkOrange);
         }
 
         private void InitSyntaxColoring()
@@ -143,7 +110,7 @@ namespace _2ndbrainalpha
         {
 
             Styles[Style.LineNumber].BackColor = Color.LightGray;
-            //this.Styles[Style.IndentGuide].ForeColor = IntToColor(FORE_COLOR);
+            this.Styles[Style.IndentGuide].ForeColor = Color.Gray;
             //this.Styles[Style.IndentGuide].BackColor = IntToColor(BACK_COLOR);
 
             var nums = Margins[NUMBER_MARGIN];

@@ -13,6 +13,7 @@ using System.Diagnostics;
 using Newtonsoft.Json;
 using Match = SearchLib.Match;
 using System.Collections.Concurrent;
+using ScintillaNET;
 using ThesaurusLib;
 
 namespace _2ndbrainalpha
@@ -381,9 +382,65 @@ namespace _2ndbrainalpha
             tvMatches.ResumeLayout();
             txtFileViewer.ResumeLayout();
         }
+
+        private void showWhiteSpaceAndTABToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var showWhitespace = showWhiteSpaceAndTABToolStripMenuItem.Checked;
+            ToggleWhiteSpace(showWhitespace);
+
+            if (showWhitespace && showEndOfLineToolStripMenuItem.Checked)
+            {
+                showEndOfLineToolStripMenuItem.Checked = false;
+                ToggleEol(false);
+            }
+        }
+
+        private void showEndOfLineToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var showEol = showEndOfLineToolStripMenuItem.Checked;
+            ToggleEol(showEol);
+
+            if (showEol && showWhiteSpaceAndTABToolStripMenuItem.Checked)
+            {
+                showWhiteSpaceAndTABToolStripMenuItem.Checked = false;
+                ToggleWhiteSpace(false);
+            }
+        }
+
+        private void showAllCharactersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            showEndOfLineToolStripMenuItem.Checked = showWhiteSpaceAndTABToolStripMenuItem.Checked = false;
+            
+            var showAll = showAllCharactersToolStripMenuItem.Checked;
+            ToggleWhiteSpace(showAll);
+            ToggleEol(showAll);
+        }
+
+        private void showWrapSymbolToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var showWrapSymbol = showWrapSymbolToolStripMenuItem.Checked;
+            txtFileViewer.WrapVisualFlags = showWrapSymbol ? WrapVisualFlags.End : WrapVisualFlags.None;
+        }
+
+        private void wordWrapToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var wordWrap = wordWrapToolStripMenuItem.Checked;
+            txtFileViewer.WrapMode = wordWrap ? WrapMode.Word : WrapMode.None;
+        }
+
         #endregion
 
         #region Private methods
+        private void ToggleEol(bool show)
+        {
+            txtFileViewer.ViewEol = show;
+        }
+
+        private void ToggleWhiteSpace(bool show)
+        {
+            txtFileViewer.ViewWhitespace = show ? WhitespaceMode.VisibleAlways : WhitespaceMode.Invisible;
+        }
+
         private void UpdateStats()
         {
             lblPosition.Text = (1 + txtFileViewer.CurrentPosition).ToString();
@@ -575,11 +632,6 @@ namespace _2ndbrainalpha
             {
                 method(args);
             }
-        }
-
-        private void SetProgressBarValue(int value)
-        {
-            InvokeIfRequired(x => { progressBarFiles.Value = (int)x[0]; lblFileCount.Text = x[0].ToString(); }, value);
         }
 
         private void SetProgressBarMaximum(int max)
