@@ -105,7 +105,7 @@ namespace _2ndbrainalpha
                 {
                     var matchCount = lastTargets.ContainsKey(targetWord) ? lastTargets[targetWord].MatchCount : 0;
                     var idx = lbTargets.Items.Add(new TargetWord(targetWord, matchCount));
-                    lbTargets.SetItemChecked(idx, true);
+                    lbTargets.SetSelected(idx, false);
                 }
             }
 
@@ -113,6 +113,7 @@ namespace _2ndbrainalpha
             {
                 targetWord.MatchCount = 0;
             }
+
 
             // Spin off thread to do the search
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
@@ -178,21 +179,6 @@ namespace _2ndbrainalpha
             SelectNode(node, true);
         }
 
-        private void txtFileViewer_Click(object sender, EventArgs e)
-        {
-            SetLineAndColumn();
-        }
-
-        private void txtFileViewer_KeyUp(object sender, KeyEventArgs e)
-        {
-            SetLineAndColumn();
-        }
-
-        private void txtFileViewer_KeyDown(object sender, KeyEventArgs e)
-        {
-            SetLineAndColumn();
-        }
-
         private void btnAddSynonyms_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtThesaurusLookup.Text))
@@ -232,7 +218,7 @@ namespace _2ndbrainalpha
             var targetWords = TargetWords;
 
             // Look up antonym of search word
-            var antonyms = _antonymLookup.GetAntonyms(searchPattern)?.Distinct()?.ToList();
+            var antonyms = _antonymLookup.GetAntonyms(searchPattern)?.Select(a => a.Trim()).Distinct()?.ToList();
             if (antonyms == null)
             {
                 MessageBox.Show("No antonyms found");
@@ -348,7 +334,7 @@ namespace _2ndbrainalpha
             lblTargetCount.Text = $"{count} item(s)";
         }
 
-        private void lbTargets_ItemCheck(object sender, ItemCheckEventArgs e)
+        private void lbTargets_SelectedIndexChanged(object sender, EventArgs e)
         {
             this.BeginInvoke((MethodInvoker)delegate {
                 if (lbTargets.Items.Count == TargetWords.Count)
@@ -356,7 +342,7 @@ namespace _2ndbrainalpha
                     _suspendFilters = false;
                 }
 
-                if (!_suspendFilters && ((TargetWord)lbTargets.Items[e.Index]).MatchCount > 0)
+                if (!_suspendFilters && lbTargets.SelectedItems.Count > 0)
                 {
                     // filter tree view on selected indices
                     FilterMatches();
@@ -373,7 +359,7 @@ namespace _2ndbrainalpha
             _suspendFilters = true;
             for (int i=0; i < lbTargets.Items.Count; i++)
             {
-                lbTargets.SetItemChecked(i, cbTargetsToggle.Checked);
+                lbTargets.SetSelected(i, cbTargetsToggle.Checked);
             }
             // filter tree view on selected indices
             FilterMatches();
@@ -741,6 +727,7 @@ namespace _2ndbrainalpha
                     if (targetWord.Word.ToLower() == m.Word.ToLower())
                     {
                         targetWord.MatchCount++;
+                        // ??????
                         lbTargets.Items[i] = lbTargets.Items[i];
                     }
                 }
@@ -839,7 +826,7 @@ namespace _2ndbrainalpha
         private void FilterMatches()
         {
             tvMatches.Nodes.Clear();
-            foreach (TargetWord item in lbTargets.CheckedItems)
+            foreach (TargetWord item in lbTargets.SelectedItems)
             {
                 var word = item.Word;
                 foreach (var file in _matchResults.Keys)
@@ -971,33 +958,6 @@ namespace _2ndbrainalpha
 
         private void SetLineAndColumn()
         {
-            /*var remainder = txtFileViewer.SelectionStart;
-            int lineNum = 0;
-            int col = 1;
-            bool found = false;
-            var lines = txtFileViewer.Text?.Split(Environment.NewLine.ToCharArray());
-            if (lines != null)
-            {
-                for (int n = 0; n < lines.Length; n++)
-                {
-                    var line = lines[n];
-                    remainder = remainder - line.Length - 1;
-                    if (remainder >= 0)
-                    {
-                        lineNum++;
-                    }
-                    else
-                    {
-                        found = true;
-                        col = line.Length + remainder + 2;
-                        break;
-                    }
-                }
-            }
-            lblLineNumber.Text = found ? (lineNum + 1).ToString() : string.Empty;
-            lblColumnNumber.Text = found ? col.ToString() : string.Empty;
-            lblPosition.Text = (txtFileViewer.SelectionStart + 1).ToString();*/
-
             lblLineNumber.Text = _lastSelectedMatch != null ? _lastSelectedMatch.LineNumber.ToString() : string.Empty;
             lblColumnNumber.Text = _lastSelectedMatch != null ? _lastSelectedMatch.StartIndex.ToString() : string.Empty;
             lblPosition.Text = _lastSelectedMatch != null ? _lastSelectedMatch.Position.ToString() : string.Empty; 

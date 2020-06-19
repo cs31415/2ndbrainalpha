@@ -114,7 +114,7 @@ namespace _2ndbrainalpha
             //this.Styles[Style.IndentGuide].BackColor = IntToColor(BACK_COLOR);
 
             var nums = Margins[NUMBER_MARGIN];
-            nums.Width = 30;
+            nums.Width = 60;
             nums.Type = MarginType.Number;
             nums.Sensitive = true;
             nums.Mask = 0;
