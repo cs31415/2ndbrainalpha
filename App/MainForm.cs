@@ -6,7 +6,6 @@ using System.Threading;
 using System.Drawing;
 using SearchLib;
 using System.Text.RegularExpressions;
-using System.Text;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Diagnostics;
@@ -92,7 +91,7 @@ namespace _2ndbrainalpha
             _lastFile = false;
 
             // populate list box
-            var lastTargets = new Dictionary<string, TargetWord>();
+            /*var lastTargets = new Dictionary<string, TargetWord>();
             foreach (TargetWord targetWord in lbTargets.Items)
             {
                 lastTargets.Add(targetWord.Word, targetWord);
@@ -112,12 +111,12 @@ namespace _2ndbrainalpha
             foreach (TargetWord targetWord in lbTargets.Items)
             {
                 targetWord.MatchCount = 0;
-            }
+            }*/
 
 
             // Spin off thread to do the search
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
-            var searchParams = new SearchParams {Path = txtPath.Text, Filter = txtFilter.Text/*, SearchPattern = txtSearch.Text*/, TargetWords = TargetWords};
+            var searchParams = new SearchParams {Path = txtPath.Text, Filter = txtFilter.Text, TargetWords = TargetWords};
             tSearch.Start(searchParams);
 
             tvMatches.Focus();
@@ -638,12 +637,6 @@ namespace _2ndbrainalpha
                 }
 
                 var targetWords = searchParams.TargetWords;
-                /*var searchPattern = searchParams.SearchPattern;
-                if (!string.IsNullOrWhiteSpace(searchPattern) && !targetWords.Contains(searchPattern)) 
-                {
-                    targetWords.Add(searchPattern);
-                    AppendTextBoxText(txtTargets, searchPattern);
-                }*/
 
                 var path = $"{searchParams.Path}";
                 if (!string.IsNullOrEmpty(path))
@@ -721,14 +714,23 @@ namespace _2ndbrainalpha
         {
             var fUpdateWordCount = new Action<Match>((m) =>
             {
-                for (int i = 0; i < lbTargets.Items.Count; i++)
+                
+                if (!lbTargets.Items.Cast<TargetWord>().Any(w => w.Word.ToLower() == m.Word.ToLower()))
                 {
-                    var targetWord = lbTargets.Items[i] as TargetWord;
-                    if (targetWord.Word.ToLower() == m.Word.ToLower())
+                    var targetWord = new TargetWord( m.Word, 1);
+                    lbTargets.Items.Add(targetWord);
+                }
+                else
+                {
+                    for (int i = 0; i < lbTargets.Items.Count; i++)
                     {
-                        targetWord.MatchCount++;
-                        // ??????
-                        lbTargets.Items[i] = lbTargets.Items[i];
+                        var targetWord = lbTargets.Items[i] as TargetWord;
+                        if (targetWord.Word.ToLower() == m.Word.ToLower())
+                        {
+                            targetWord.MatchCount++;
+                            lbTargets.Items[i] = targetWord;
+                            break;
+                        }
                     }
                 }
             });
@@ -741,11 +743,16 @@ namespace _2ndbrainalpha
                 fUpdateWordCount(match);
             }
 
+            // If we have other matches for this file, then append to that set
             if (_matchResults.ContainsKey(match.File))
             {
-                var fileMatchData = _matchResults[match.File];
-                fileMatchData.Matches.Add(match);
-                if (_lastFile && fileMatchData.MatchCount == fileMatchData.Matches.Count)
+                // Get matches for file
+                var fileMatches = _matchResults[match.File];
+                // Append to it
+                fileMatches.Matches.Add(match);
+
+                // If we're at the last file and 
+                if (_lastFile && _matchResults.All(p => p.Value.MatchCount == p.Value.Matches.Count))
                 {
                     OnComplete();
                 }
@@ -864,7 +871,7 @@ namespace _2ndbrainalpha
             // Remove targets checked listbox items with zero counts
             InvokeIfRequired((x) =>
             {
-                /*_suspendFilters = true;
+                _suspendFilters = true;
                 for (int i=lbTargets.Items.Count - 1; i >= 0; i--)
                 {
                     TargetWord item = lbTargets.Items[i] as TargetWord;
@@ -874,20 +881,7 @@ namespace _2ndbrainalpha
                     }
                 }
 
-                var sItems = new List<TargetWord>();
-                var lbItems = lbTargets.Items.Cast<TargetWord>().OrderByDescending(t => t.MatchCount);
-                foreach (TargetWord word in lbItems)
-                {
-                    sItems.Add(word);
-                }
-                lbTargets.Items.Clear();
-                foreach (TargetWord word in sItems)
-                {
-                    var idx = lbTargets.Items.Add(word);
-                    lbTargets.SetItemChecked(idx, true);
-                }
-
-                _suspendFilters = false;*/
+                _suspendFilters = false;
             }, null);
         }
 
