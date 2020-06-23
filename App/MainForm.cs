@@ -90,29 +90,7 @@ namespace _2ndbrainalpha
             _suspendFilters = true;
             _lastFile = false;
 
-            // populate list box
-            /*var lastTargets = new Dictionary<string, TargetWord>();
-            foreach (TargetWord targetWord in lbTargets.Items)
-            {
-                lastTargets.Add(targetWord.Word, targetWord);
-            }
-
             lbTargets.Items.Clear();
-            foreach (var targetWord in TargetWords)
-            {
-                if (!lbTargets.Items.Cast<TargetWord>().Any(t => t.Word.ToLower() == targetWord.ToLower()))
-                {
-                    var matchCount = lastTargets.ContainsKey(targetWord) ? lastTargets[targetWord].MatchCount : 0;
-                    var idx = lbTargets.Items.Add(new TargetWord(targetWord, matchCount));
-                    lbTargets.SetSelected(idx, false);
-                }
-            }
-
-            foreach (TargetWord targetWord in lbTargets.Items)
-            {
-                targetWord.MatchCount = 0;
-            }*/
-
 
             // Spin off thread to do the search
             var tSearch = new Thread(new ParameterizedThreadStart(SearchThread));
@@ -352,13 +330,16 @@ namespace _2ndbrainalpha
 
         private void cbTargetsToggle_CheckedChanged(object sender, EventArgs e)
         {
+            if (!cbTargetsToggle.Checked)
+                return;
+
             txtFileViewer.SuspendLayout();
             TreeNode topNode = tvMatches.TopNode;
             tvMatches.SuspendLayout();
             _suspendFilters = true;
             for (int i=0; i < lbTargets.Items.Count; i++)
             {
-                lbTargets.SetSelected(i, cbTargetsToggle.Checked);
+                lbTargets.SetSelected(i, true);
             }
             // filter tree view on selected indices
             FilterMatches();
